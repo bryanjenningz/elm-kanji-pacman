@@ -7,6 +7,7 @@ import Html exposing (Html)
 import Html.Attributes exposing (style)
 import Json.Decode as Decode exposing (Decoder)
 import Page exposing (Page)
+import Random
 import Route exposing (Route)
 import Set exposing (Set)
 import Shared
@@ -143,15 +144,14 @@ type Msg
     = UpdateLoop
     | SetKeyDown String
     | SetKeyUp String
+    | GenerateMonsterPath Monster
 
 
 update : Msg -> Model -> ( Model, Effect Msg )
 update msg model =
     case msg of
         UpdateLoop ->
-            ( updateLoop model
-            , Effect.none
-            )
+            updateLoop model
 
         SetKeyDown key ->
             ( { model | keysDown = Set.insert key model.keysDown }
@@ -163,10 +163,35 @@ update msg model =
             , Effect.none
             )
 
+        GenerateMonsterPath monster ->
+            ( { model
+                | monsters =
+                    List.map
+                        (\m ->
+                            if m.id == monster.id then
+                                monster
 
-updateLoop : Model -> Model
+                            else
+                                m
+                        )
+                        model.monsters
+              }
+            , Effect.none
+            )
+
+
+updateLoop : Model -> ( Model, Effect Msg )
 updateLoop model =
-    { model | player = updatePlayer model }
+    let
+        ( newMonsters, newEffect ) =
+            updateMonsters model
+    in
+    ( { model
+        | player = updatePlayer model
+        , monsters = newMonsters
+      }
+    , newEffect
+    )
 
 
 updatePlayer : Model -> Player
@@ -191,6 +216,70 @@ updatePlayer ({ player, keysDown } as model) =
                 movePlayer playerWithNewDirection
     in
     newPlayer
+
+
+updateMonsters : Model -> ( List Monster, Effect Msg )
+updateMonsters model =
+    case getTargetMonster model.monsters of
+        Nothing ->
+            ( model.monsters, Effect.none )
+
+        Just targetMonster ->
+            let
+                ( newMonsters, newEffects ) =
+                    model.monsters
+                        |> List.map (updateMonster targetMonster model.player)
+                        |> partition
+            in
+            ( List.filterMap identity newMonsters
+            , Effect.batch newEffects
+            )
+
+
+partition : List ( a, b ) -> ( List a, List b )
+partition list =
+    ( List.map Tuple.first list
+    , List.map Tuple.second list
+    )
+
+
+updateMonster : Monster -> Player -> Monster -> ( Maybe Monster, Effect Msg )
+updateMonster targetMonster player monster =
+    if targetMonster == monster && isOverlapping player monster then
+        let
+            newId =
+                monster.id + List.length initMonsters
+        in
+        case Array.get newId initKanjis of
+            Nothing ->
+                ( Nothing, Effect.none )
+
+            Just newKanji ->
+                ( Just { monster | id = newId, kanji = newKanji }
+                , Effect.none
+                )
+
+    else
+        case monster.path of
+            [] ->
+                ( Just monster
+                , generateMonsterPath monster
+                )
+
+            nextStep :: remPath ->
+                if isSamePosition nextStep monster then
+                    ( Just { monster | path = remPath }
+                    , Effect.none
+                    )
+
+                else
+                    moveMonster monster
+                        |> Tuple.mapFirst Just
+
+
+getTargetMonster : List Monster -> Maybe Monster
+getTargetMonster monsters =
+    List.sortBy .id monsters |> List.head
 
 
 directionFromKeysDown : Set String -> Maybe Direction
@@ -224,18 +313,146 @@ isOverlappingWall value =
     List.any (isOverlapping value) screenWalls
 
 
-movePlayer : Player -> Player
-movePlayer player =
+move : Int -> Direction -> { a | x : Int, y : Int } -> { a | x : Int, y : Int }
+move speed direction value =
     let
         { dx, dy } =
-            directionDeltas player.direction
+            directionDeltas direction
     in
-    { player | x = player.x + dx * playerSpeed, y = player.y + dy * playerSpeed }
+    { value | x = value.x + dx * speed, y = value.y + dy * speed }
+
+
+movePlayer : Player -> Player
+movePlayer player =
+    move playerSpeed player.direction player
+
+
+moveMonster : Monster -> ( Monster, Effect Msg )
+moveMonster monster =
+    case monsterDirection monster of
+        Nothing ->
+            ( monster, generateMonsterPath monster )
+
+        Just direction ->
+            ( move monsterSpeed direction monster, Effect.none )
+
+
+monsterDirection : Monster -> Maybe Direction
+monsterDirection monster =
+    case monster.path of
+        [] ->
+            Nothing
+
+        nextStep :: remPath ->
+            if isSamePosition nextStep monster then
+                monsterDirection { monster | path = remPath }
+
+            else
+                let
+                    dx =
+                        nextStep.x - monster.x
+
+                    dy =
+                        nextStep.y - monster.y
+                in
+                if dy < 0 then
+                    Just Up
+
+                else if dy > 0 then
+                    Just Down
+
+                else if dx < 0 then
+                    Just Left
+
+                else if dx > 0 then
+                    Just Right
+
+                else
+                    Nothing
+
+
+isSamePosition : { a | x : Int, y : Int } -> { b | x : Int, y : Int } -> Bool
+isSamePosition a b =
+    a.x == b.x && a.y == b.y
+
+
+generateMonsterPath : Monster -> Effect Msg
+generateMonsterPath monster =
+    Random.int 0 (List.length screenSpaces - 1)
+        |> Random.map
+            (\i ->
+                let
+                    newDestination =
+                        get i screenSpaces
+                            |> Maybe.withDefault { x = 20, y = 20 }
+
+                    newPath =
+                        findShortestPath { x = monster.x, y = monster.y } newDestination
+                in
+                { monster | path = newPath }
+            )
+        |> Random.generate GenerateMonsterPath
+        |> Effect.sendCmd
+
+
+findShortestPath : { x : Int, y : Int } -> { x : Int, y : Int } -> List { x : Int, y : Int }
+findShortestPath from to =
+    findShortestPath_ from to []
+        |> Maybe.withDefault []
+
+
+findShortestPath_ : { x : Int, y : Int } -> { x : Int, y : Int } -> List { x : Int, y : Int } -> Maybe (List { x : Int, y : Int })
+findShortestPath_ from to path =
+    if not (isScreenSpace from) then
+        Nothing
+
+    else if from == to then
+        Just (List.reverse path)
+
+    else
+        List.foldl
+            (\direction result ->
+                case result of
+                    Nothing ->
+                        findShortestPath_
+                            (move spotSize direction from)
+                            to
+                            (from :: path)
+
+                    Just resultPath ->
+                        Just resultPath
+            )
+            Nothing
+            [ Up, Down, Left, Right ]
+
+
+isScreenSpace : { x : Int, y : Int } -> Bool
+isScreenSpace spot =
+    List.any ((==) spot) screenSpaces
+
+
+get : Int -> List a -> Maybe a
+get i list =
+    case list of
+        [] ->
+            Nothing
+
+        first :: rest ->
+            if i <= 0 then
+                Just first
+
+            else
+                get (i - 1) rest
 
 
 playerSpeed : Int
 playerSpeed =
     2
+
+
+monsterSpeed : Int
+monsterSpeed =
+    1
 
 
 directionDeltas : Direction -> { dx : Int, dy : Int }
@@ -295,7 +512,6 @@ view model =
                 , viewPlayer model.player
                 , viewMonsters model.monsters
                 ]
-            , Html.div [] [ Html.text (Debug.toString model) ]
             ]
         ]
     }
