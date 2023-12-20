@@ -1,9 +1,9 @@
 module Pages.Home_ exposing (Model, Msg, page)
 
 import Effect exposing (Effect)
-import Route exposing (Route)
 import Html
 import Page exposing (Page)
+import Route exposing (Route)
 import Shared
 import View exposing (View)
 
@@ -23,12 +23,35 @@ page shared route =
 
 
 type alias Model =
-    {}
+    { player : Player
+    }
+
+
+type alias Player =
+    { x : Int
+    , y : Int
+    , direction : Direction
+    }
+
+
+type Direction
+    = Up
+    | Down
+    | Left
+    | Right
+
+
+initPlayer : Player
+initPlayer =
+    { x = 7
+    , y = 10
+    , direction = Left
+    }
 
 
 init : () -> ( Model, Effect Msg )
 init () =
-    ( {}
+    ( { player = initPlayer }
     , Effect.none
     )
 
