@@ -1,11 +1,14 @@
 module Pages.Home_ exposing (Model, Msg, page)
 
 import Array exposing (Array)
+import Browser.Events exposing (onKeyDown)
 import Effect exposing (Effect)
 import Html exposing (Html)
 import Html.Attributes exposing (style)
+import Json.Decode as Decode exposing (Decoder)
 import Page exposing (Page)
 import Route exposing (Route)
+import Set exposing (Set)
 import Shared
 import View exposing (View)
 
@@ -27,6 +30,7 @@ page shared route =
 type alias Model =
     { player : Player
     , monsters : List Monster
+    , keysDown : Set String
     }
 
 
@@ -124,6 +128,7 @@ init : () -> ( Model, Effect Msg )
 init () =
     ( { player = initPlayer
       , monsters = initMonsters
+      , keysDown = Set.empty
       }
     , Effect.none
     )
@@ -134,14 +139,14 @@ init () =
 
 
 type Msg
-    = NoOp
+    = SetKeyDown String
 
 
 update : Msg -> Model -> ( Model, Effect Msg )
 update msg model =
     case msg of
-        NoOp ->
-            ( model
+        SetKeyDown key ->
+            ( { model | keysDown = Set.insert key model.keysDown }
             , Effect.none
             )
 
@@ -152,7 +157,12 @@ update msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    onKeyDown (Decode.map SetKeyDown keyDecoder)
+
+
+keyDecoder : Decoder String
+keyDecoder =
+    Decode.field "key" Decode.string
 
 
 
