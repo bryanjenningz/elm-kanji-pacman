@@ -71,10 +71,10 @@ type alias Monster =
 
 initMonsters : List Monster
 initMonsters =
-    [ { x = 4, y = 4 }
-    , { x = 8, y = 4 }
-    , { x = 4, y = 8 }
-    , { x = 8, y = 8 }
+    [ { x = 5, y = 3 }
+    , { x = 9, y = 3 }
+    , { x = 5, y = 7 }
+    , { x = 9, y = 7 }
     ]
         |> List.indexedMap
             (\i { x, y } ->
@@ -169,7 +169,9 @@ view model =
             , style "display" "flex"
             , style "justify-content" "center"
             ]
-            [ viewScreen ]
+            [ viewScreen
+            , viewMonsters model.monsters
+            ]
         ]
     }
 
@@ -292,9 +294,44 @@ wallSpotColor =
 
 spaceSpotColor : String
 spaceSpotColor =
-    "#000"
+    "#222"
 
 
 px : Int -> String
 px x =
     String.fromInt x ++ "px"
+
+
+
+-- MONSTERS
+
+
+viewMonsters : List Monster -> Html msg
+viewMonsters monsters =
+    Html.div
+        [ style "position" "absolute"
+        , style "width" (px screenSize)
+        , style "height" (px screenSize)
+        ]
+        (List.map viewMonster monsters)
+
+
+viewMonster : Monster -> Html msg
+viewMonster monster =
+    Html.div
+        [ style "width" (px spotSize)
+        , style "height" (px spotSize)
+        , style "background-color" monsterColor
+        , style "position" "absolute"
+        , style "left" (px (monster.x * spotSize))
+        , style "top" (px (monster.y * spotSize))
+        , style "display" "flex"
+        , style "justify-content" "center"
+        , style "align-items" "center"
+        ]
+        [ Html.text monster.kanji.character ]
+
+
+monsterColor : String
+monsterColor =
+    "#000"
