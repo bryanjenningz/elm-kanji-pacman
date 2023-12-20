@@ -139,13 +139,19 @@ init () =
 
 
 type Msg
-    = SetKeyDown String
+    = UpdateLoop
+    | SetKeyDown String
     | SetKeyUp String
 
 
 update : Msg -> Model -> ( Model, Effect Msg )
 update msg model =
     case msg of
+        UpdateLoop ->
+            ( updateLoop model
+            , Effect.none
+            )
+
         SetKeyDown key ->
             ( { model | keysDown = Set.insert key model.keysDown }
             , Effect.none
@@ -155,6 +161,11 @@ update msg model =
             ( { model | keysDown = Set.remove key model.keysDown }
             , Effect.none
             )
+
+
+updateLoop : Model -> Model
+updateLoop model =
+    model
 
 
 
