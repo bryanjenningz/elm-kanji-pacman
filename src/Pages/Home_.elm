@@ -10,6 +10,7 @@ import Page exposing (Page)
 import Route exposing (Route)
 import Set exposing (Set)
 import Shared
+import Time
 import View exposing (View)
 
 
@@ -54,8 +55,8 @@ type Direction
 
 initPlayer : Player
 initPlayer =
-    { x = 7
-    , y = 11
+    { x = 7 * spotSize
+    , y = 11 * spotSize
     , direction = Left
     }
 
@@ -164,8 +165,56 @@ update msg model =
 
 
 updateLoop : Model -> Model
-updateLoop model =
-    model
+updateLoop ({ player } as model) =
+    let
+        newPlayer =
+            if isOverlappingWall (movePlayer player) then
+                player
+
+            else
+                movePlayer player
+    in
+    { model | player = newPlayer }
+
+
+isOverlapping : { a | x : Int, y : Int } -> { b | x : Int, y : Int } -> Bool
+isOverlapping a b =
+    a.x + spotSize > b.x && a.x < b.x + spotSize && a.y + spotSize > b.y && a.y < b.y + spotSize
+
+
+isOverlappingWall : { a | x : Int, y : Int } -> Bool
+isOverlappingWall value =
+    List.any (isOverlapping value) screenWalls
+
+
+movePlayer : Player -> Player
+movePlayer player =
+    let
+        { dx, dy } =
+            directionDeltas player.direction
+    in
+    { player | x = player.x + dx * playerSpeed, y = player.y + dy * playerSpeed }
+
+
+playerSpeed : Int
+playerSpeed =
+    2
+
+
+directionDeltas : Direction -> { dx : Int, dy : Int }
+directionDeltas direction =
+    case direction of
+        Up ->
+            { dx = 0, dy = -1 }
+
+        Down ->
+            { dx = 0, dy = 1 }
+
+        Left ->
+            { dx = -1, dy = 0 }
+
+        Right ->
+            { dx = 1, dy = 0 }
 
 
 
@@ -175,7 +224,8 @@ updateLoop model =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ onKeyDown (Decode.map SetKeyDown keyDecoder)
+        [ Time.every 15 (\_ -> UpdateLoop)
+        , onKeyDown (Decode.map SetKeyDown keyDecoder)
         , onKeyUp (Decode.map SetKeyUp keyDecoder)
         ]
 
@@ -267,7 +317,7 @@ screenSpots spot =
                     |> indexedConcatMap
                         (\x screenSpot ->
                             if screenSpot == spot then
-                                [ { x = x, y = y } ]
+                                [ { x = x * spotSize, y = y * spotSize } ]
 
                             else
                                 []
@@ -350,8 +400,8 @@ viewPlayer player =
         , style "background-color" playerColor
         , style "width" (px spotSize)
         , style "height" (px spotSize)
-        , style "left" (px (player.x * spotSize))
-        , style "top" (px (player.y * spotSize))
+        , style "left" (px player.x)
+        , style "top" (px player.y)
         ]
         []
 
