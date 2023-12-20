@@ -1,7 +1,7 @@
 module Pages.Home_ exposing (Model, Msg, page)
 
 import Array exposing (Array)
-import Browser.Events exposing (onKeyDown)
+import Browser.Events exposing (onKeyDown, onKeyUp)
 import Effect exposing (Effect)
 import Html exposing (Html)
 import Html.Attributes exposing (style)
@@ -140,6 +140,7 @@ init () =
 
 type Msg
     = SetKeyDown String
+    | SetKeyUp String
 
 
 update : Msg -> Model -> ( Model, Effect Msg )
@@ -150,6 +151,11 @@ update msg model =
             , Effect.none
             )
 
+        SetKeyUp key ->
+            ( { model | keysDown = Set.remove key model.keysDown }
+            , Effect.none
+            )
+
 
 
 -- SUBSCRIPTIONS
@@ -157,7 +163,10 @@ update msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    onKeyDown (Decode.map SetKeyDown keyDecoder)
+    Sub.batch
+        [ onKeyDown (Decode.map SetKeyDown keyDecoder)
+        , onKeyUp (Decode.map SetKeyUp keyDecoder)
+        ]
 
 
 keyDecoder : Decoder String
