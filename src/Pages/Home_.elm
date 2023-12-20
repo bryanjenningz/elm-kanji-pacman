@@ -51,7 +51,7 @@ type Direction
 initPlayer : Player
 initPlayer =
     { x = 7
-    , y = 10
+    , y = 11
     , direction = Left
     }
 
@@ -169,8 +169,15 @@ view model =
             , style "display" "flex"
             , style "justify-content" "center"
             ]
-            [ viewScreen
-            , viewMonsters model.monsters
+            [ Html.div
+                [ style "width" (px screenSize)
+                , style "height" (px screenSize)
+                , style "position" "relative"
+                ]
+                [ viewScreen
+                , viewPlayer model.player
+                , viewMonsters model.monsters
+                ]
             ]
         ]
     }
@@ -303,17 +310,34 @@ px x =
 
 
 
+-- PLAYER
+
+
+viewPlayer : Player -> Html msg
+viewPlayer player =
+    Html.div
+        [ style "position" "absolute"
+        , style "background-color" playerColor
+        , style "width" (px spotSize)
+        , style "height" (px spotSize)
+        , style "left" (px (player.x * spotSize))
+        , style "top" (px (player.y * spotSize))
+        ]
+        []
+
+
+playerColor : String
+playerColor =
+    "#1678aa"
+
+
+
 -- MONSTERS
 
 
 viewMonsters : List Monster -> Html msg
 viewMonsters monsters =
-    Html.div
-        [ style "position" "absolute"
-        , style "width" (px screenSize)
-        , style "height" (px screenSize)
-        ]
-        (List.map viewMonster monsters)
+    Html.div [] (List.map viewMonster monsters)
 
 
 viewMonster : Monster -> Html msg
