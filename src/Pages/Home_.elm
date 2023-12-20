@@ -100,21 +100,21 @@ type alias Kanji =
 
 defaultKanji : Kanji
 defaultKanji =
-    { name = "", meaning = "one" }
+    { name = "一", meaning = "one" }
 
 
 initKanjis : Array Kanji
 initKanjis =
     [ defaultKanji
-    , { name = "", meaning = "two" }
-    , { name = "", meaning = "three" }
-    , { name = "", meaning = "four" }
-    , { name = "", meaning = "five" }
-    , { name = "", meaning = "six" }
-    , { name = "", meaning = "seven" }
-    , { name = "", meaning = "eight" }
-    , { name = "", meaning = "nine" }
-    , { name = "", meaning = "ten" }
+    , { name = "二", meaning = "two" }
+    , { name = "三", meaning = "three" }
+    , { name = "四", meaning = "four" }
+    , { name = "五", meaning = "five" }
+    , { name = "六", meaning = "six" }
+    , { name = "七", meaning = "seven" }
+    , { name = "八", meaning = "eight" }
+    , { name = "九", meaning = "nine" }
+    , { name = "十", meaning = "ten" }
     ]
         |> Array.fromList
 
