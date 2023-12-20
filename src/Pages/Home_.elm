@@ -93,28 +93,28 @@ initMonsters =
 
 
 type alias Kanji =
-    { name : String
+    { character : String
     , meaning : String
     }
 
 
 defaultKanji : Kanji
 defaultKanji =
-    { name = "一", meaning = "one" }
+    { character = "一", meaning = "one" }
 
 
 initKanjis : Array Kanji
 initKanjis =
     [ defaultKanji
-    , { name = "二", meaning = "two" }
-    , { name = "三", meaning = "three" }
-    , { name = "四", meaning = "four" }
-    , { name = "五", meaning = "five" }
-    , { name = "六", meaning = "six" }
-    , { name = "七", meaning = "seven" }
-    , { name = "八", meaning = "eight" }
-    , { name = "九", meaning = "nine" }
-    , { name = "十", meaning = "ten" }
+    , { character = "二", meaning = "two" }
+    , { character = "三", meaning = "three" }
+    , { character = "四", meaning = "four" }
+    , { character = "五", meaning = "five" }
+    , { character = "六", meaning = "six" }
+    , { character = "七", meaning = "seven" }
+    , { character = "八", meaning = "eight" }
+    , { character = "九", meaning = "nine" }
+    , { character = "十", meaning = "ten" }
     ]
         |> Array.fromList
 
