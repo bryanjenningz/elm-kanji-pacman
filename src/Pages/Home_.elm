@@ -165,21 +165,58 @@ update msg model =
 
 
 updateLoop : Model -> Model
-updateLoop ({ player } as model) =
+updateLoop model =
+    { model | player = updatePlayer model }
+
+
+updatePlayer : Model -> Player
+updatePlayer ({ player, keysDown } as model) =
     let
-        newPlayer =
-            if isOverlappingWall (movePlayer player) then
+        newDirection =
+            directionFromKeysDown keysDown
+                |> Maybe.withDefault player.direction
+
+        playerWithNewDirection =
+            if isOverlappingWall (movePlayer { player | direction = newDirection }) then
                 player
 
             else
-                movePlayer player
+                { player | direction = newDirection }
+
+        newPlayer =
+            if isOverlappingWall (movePlayer playerWithNewDirection) then
+                playerWithNewDirection
+
+            else
+                movePlayer playerWithNewDirection
     in
-    { model | player = newPlayer }
+    newPlayer
+
+
+directionFromKeysDown : Set String -> Maybe Direction
+directionFromKeysDown keysDown =
+    if Set.member "ArrowUp" keysDown then
+        Just Up
+
+    else if Set.member "ArrowDown" keysDown then
+        Just Down
+
+    else if Set.member "ArrowLeft" keysDown then
+        Just Left
+
+    else if Set.member "ArrowRight" keysDown then
+        Just Right
+
+    else
+        Nothing
 
 
 isOverlapping : { a | x : Int, y : Int } -> { b | x : Int, y : Int } -> Bool
 isOverlapping a b =
-    a.x + spotSize > b.x && a.x < b.x + spotSize && a.y + spotSize > b.y && a.y < b.y + spotSize
+    (a.x + spotSize > b.x)
+        && (a.x < b.x + spotSize)
+        && (a.y + spotSize > b.y)
+        && (a.y < b.y + spotSize)
 
 
 isOverlappingWall : { a | x : Int, y : Int } -> Bool
@@ -258,6 +295,7 @@ view model =
                 , viewPlayer model.player
                 , viewMonsters model.monsters
                 ]
+            , Html.div [] [ Html.text (Debug.toString model) ]
             ]
         ]
     }
