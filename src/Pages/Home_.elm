@@ -85,8 +85,8 @@ initMonsters =
         |> List.indexedMap
             (\i { x, y } ->
                 { id = i
-                , x = x
-                , y = y
+                , x = x * spotSize
+                , y = y * spotSize
                 , kanji =
                     Array.get i initKanjis
                         |> Maybe.withDefault defaultKanji
@@ -380,12 +380,15 @@ generateMonsterPath monster =
         |> Random.map
             (\i ->
                 let
-                    newDestination =
-                        get i screenSpaces
-                            |> Maybe.withDefault { x = 20, y = 20 }
-
                     newPath =
-                        findShortestPath { x = monster.x, y = monster.y } newDestination
+                        case get i screenSpaces of
+                            Nothing ->
+                                []
+
+                            Just newDestination ->
+                                findShortestPath
+                                    { x = monster.x, y = monster.y }
+                                    newDestination
                 in
                 { monster | path = newPath }
             )
@@ -395,13 +398,13 @@ generateMonsterPath monster =
 
 findShortestPath : { x : Int, y : Int } -> { x : Int, y : Int } -> List { x : Int, y : Int }
 findShortestPath from to =
-    findShortestPath_ from to []
+    findShortestPath_ from to Set.empty []
         |> Maybe.withDefault []
 
 
-findShortestPath_ : { x : Int, y : Int } -> { x : Int, y : Int } -> List { x : Int, y : Int } -> Maybe (List { x : Int, y : Int })
-findShortestPath_ from to path =
-    if not (isScreenSpace from) then
+findShortestPath_ : { x : Int, y : Int } -> { x : Int, y : Int } -> Set ( Int, Int ) -> List { x : Int, y : Int } -> Maybe (List { x : Int, y : Int })
+findShortestPath_ from to visited path =
+    if Set.member ( from.x, from.y ) visited || not (isScreenSpace from) then
         Nothing
 
     else if from == to then
@@ -415,6 +418,7 @@ findShortestPath_ from to path =
                         findShortestPath_
                             (move spotSize direction from)
                             to
+                            (Set.insert ( from.x, from.y ) visited)
                             (from :: path)
 
                     Just resultPath ->
@@ -679,8 +683,8 @@ viewMonster monster =
         , style "height" (px spotSize)
         , style "background-color" monsterColor
         , style "position" "absolute"
-        , style "left" (px (monster.x * spotSize))
-        , style "top" (px (monster.y * spotSize))
+        , style "left" (px monster.x)
+        , style "top" (px monster.y)
         , style "display" "flex"
         , style "justify-content" "center"
         , style "align-items" "center"
