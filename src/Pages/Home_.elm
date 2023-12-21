@@ -2,7 +2,7 @@ module Pages.Home_ exposing (Model, Msg, page)
 
 import Array exposing (Array)
 import Browser.Events exposing (onKeyDown, onKeyUp)
-import Direction exposing (Direction(..), directionDeltas, directionFromKeysDown)
+import Direction exposing (Direction(..))
 import Effect exposing (Effect)
 import Html exposing (Html)
 import Html.Attributes exposing (style)
@@ -115,7 +115,7 @@ updatePlayer : Model -> Player
 updatePlayer ({ player, keysDown } as model) =
     let
         newDirection =
-            directionFromKeysDown keysDown
+            Direction.fromKeysDown keysDown
                 |> Maybe.withDefault player.direction
 
         playerWithNewDirection =
@@ -211,7 +211,7 @@ move : Int -> Direction -> { a | x : Int, y : Int } -> { a | x : Int, y : Int }
 move speed direction value =
     let
         { dx, dy } =
-            directionDeltas direction
+            Direction.toDeltas direction
     in
     { value | x = value.x + dx * speed, y = value.y + dy * speed }
 

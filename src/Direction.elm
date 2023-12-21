@@ -1,4 +1,4 @@
-module Direction exposing (..)
+module Direction exposing (Direction(..), fromKeysDown, toDeltas)
 
 import Set exposing (Set)
 
@@ -10,24 +10,8 @@ type Direction
     | Right
 
 
-directionDeltas : Direction -> { dx : Int, dy : Int }
-directionDeltas direction =
-    case direction of
-        Up ->
-            { dx = 0, dy = -1 }
-
-        Down ->
-            { dx = 0, dy = 1 }
-
-        Left ->
-            { dx = -1, dy = 0 }
-
-        Right ->
-            { dx = 1, dy = 0 }
-
-
-directionFromKeysDown : Set String -> Maybe Direction
-directionFromKeysDown keysDown =
+fromKeysDown : Set String -> Maybe Direction
+fromKeysDown keysDown =
     if Set.member "ArrowUp" keysDown then
         Just Up
 
@@ -42,3 +26,19 @@ directionFromKeysDown keysDown =
 
     else
         Nothing
+
+
+toDeltas : Direction -> { dx : Int, dy : Int }
+toDeltas direction =
+    case direction of
+        Up ->
+            { dx = 0, dy = -1 }
+
+        Down ->
+            { dx = 0, dy = 1 }
+
+        Left ->
+            { dx = -1, dy = 0 }
+
+        Right ->
+            { dx = 1, dy = 0 }
