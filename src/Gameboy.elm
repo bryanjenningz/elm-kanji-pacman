@@ -1,9 +1,20 @@
 module Gameboy exposing (view)
 
 import Direction exposing (Direction(..))
-import Html exposing (Html, button, div)
+import Html exposing (Attribute, Html, button, div)
 import Html.Attributes exposing (style)
-import Html.Events exposing (onClick, onMouseDown, onMouseUp)
+import Html.Events exposing (on, onClick, onMouseDown, onMouseUp)
+import Json.Decode as Decode
+
+
+onTouchStart : msg -> Attribute msg
+onTouchStart message =
+    on "touchstart" (Decode.succeed message)
+
+
+onTouchEnd : msg -> Attribute msg
+onTouchEnd message =
+    on "touchend" (Decode.succeed message)
 
 
 type alias Controls msg =
@@ -45,6 +56,7 @@ view controls screen =
                 , style "background-color" "#333"
                 , style "border-radius" "16px"
                 , style "position" "relative"
+                , style "overflow" "hidden"
                 ]
                 [ screen ]
             ]
@@ -76,6 +88,7 @@ view controls screen =
                         , style "height" "30px"
                         , style "background-color" "black"
                         , style "border-radius" "16px"
+                        , style "overflow" "hidden"
                         ]
                         [ button
                             [ style "position" "absolute"
@@ -85,6 +98,8 @@ view controls screen =
                             , style "width" "30px"
                             , onMouseDown (controls.onPadDown Left)
                             , onMouseUp (controls.onPadUp Left)
+                            , onTouchStart (controls.onPadDown Left)
+                            , onTouchEnd (controls.onPadUp Left)
                             ]
                             []
                         , button
@@ -95,6 +110,8 @@ view controls screen =
                             , style "width" "30px"
                             , onMouseDown (controls.onPadDown Right)
                             , onMouseUp (controls.onPadUp Right)
+                            , onTouchStart (controls.onPadDown Right)
+                            , onTouchEnd (controls.onPadUp Right)
                             ]
                             []
                         ]
@@ -105,6 +122,7 @@ view controls screen =
                         , style "height" "100px"
                         , style "background-color" "black"
                         , style "border-radius" "16px"
+                        , style "overflow" "hidden"
                         ]
                         [ button
                             [ style "position" "absolute"
@@ -114,6 +132,8 @@ view controls screen =
                             , style "height" "30px"
                             , onMouseDown (controls.onPadDown Up)
                             , onMouseUp (controls.onPadUp Up)
+                            , onTouchStart (controls.onPadDown Up)
+                            , onTouchEnd (controls.onPadUp Up)
                             ]
                             []
                         , button
@@ -124,6 +144,8 @@ view controls screen =
                             , style "height" "30px"
                             , onMouseDown (controls.onPadDown Down)
                             , onMouseUp (controls.onPadUp Down)
+                            , onTouchStart (controls.onPadDown Down)
+                            , onTouchEnd (controls.onPadUp Down)
                             ]
                             []
                         ]

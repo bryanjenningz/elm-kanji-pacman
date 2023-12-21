@@ -4,6 +4,7 @@ import Array exposing (Array)
 import Browser.Events exposing (onKeyDown, onKeyUp)
 import Direction exposing (Direction(..))
 import Effect exposing (Effect)
+import Gameboy
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (style)
 import Http
@@ -61,7 +62,8 @@ init () =
 
 
 type Msg
-    = UpdateLoop
+    = NoOp
+    | UpdateLoop
     | SetKeyDown String
     | SetKeyUp String
     | GenerateMonsterPath Monster
@@ -71,6 +73,9 @@ type Msg
 update : Msg -> Model -> ( Model, Effect Msg )
 update msg model =
     case msg of
+        NoOp ->
+            ( model, Effect.none )
+
         UpdateLoop ->
             updateLoop model
 
@@ -293,15 +298,24 @@ view model =
             , style "gap" "8px"
             , style "align-items" "center"
             ]
-            [ div
-                [ style "width" (px Screen.size)
-                , style "height" (px Screen.size)
-                , style "position" "relative"
-                ]
-                [ Screen.view
-                , Player.view model.player
-                , Monsters.view model.monsters
-                ]
+            [ Gameboy.view
+                { onPadDown = Direction.toArrowKey >> SetKeyDown
+                , onPadUp = Direction.toArrowKey >> SetKeyUp
+                , onClickA = NoOp
+                , onClickB = NoOp
+                , onClickStart = NoOp
+                , onClickSelect = NoOp
+                }
+                (div
+                    [ style "width" (px Screen.size)
+                    , style "height" (px Screen.size)
+                    , style "transform" "translate(-50px, -50px) scale(0.66)"
+                    ]
+                    [ Screen.view
+                    , Player.view model.player
+                    , Monsters.view model.monsters
+                    ]
+                )
             , case Monsters.getTarget model.monsters of
                 Nothing ->
                     text ""
