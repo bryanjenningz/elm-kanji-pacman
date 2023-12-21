@@ -1,18 +1,42 @@
-module Screen exposing (..)
+module Screen exposing (isSpace, size, spaces, spotSize, view, walls)
 
 import Html exposing (Html)
 import Html.Attributes exposing (style)
 import Utils exposing (px)
 
 
-screenSize : Int
-screenSize =
+size : Int
+size =
     300
 
 
 spotSize : Int
 spotSize =
     20
+
+
+spaces : List { x : Int, y : Int }
+spaces =
+    screenSpots spaceSpot
+
+
+walls : List { x : Int, y : Int }
+walls =
+    screenSpots wallSpot
+
+
+view : Html msg
+view =
+    Html.div [] (List.map viewScreenRow screen)
+
+
+isSpace : { x : Int, y : Int } -> Bool
+isSpace spot =
+    List.any ((==) spot) spaces
+
+
+
+-- INTERNAL
 
 
 screen : List (List String)
@@ -36,16 +60,6 @@ screen =
         |> List.map (String.split "")
 
 
-spaceSpot : String
-spaceSpot =
-    " "
-
-
-wallSpot : String
-wallSpot =
-    "#"
-
-
 screenSpots : String -> List { x : Int, y : Int }
 screenSpots spot =
     screen
@@ -63,24 +77,29 @@ screenSpots spot =
             )
 
 
-screenSpaces : List { x : Int, y : Int }
-screenSpaces =
-    screenSpots spaceSpot
+spaceSpot : String
+spaceSpot =
+    " "
 
 
-screenWalls : List { x : Int, y : Int }
-screenWalls =
-    screenSpots wallSpot
+wallSpot : String
+wallSpot =
+    "#"
+
+
+wallSpotColor : String
+wallSpotColor =
+    "#1b1bb5"
+
+
+spaceSpotColor : String
+spaceSpotColor =
+    "#222"
 
 
 indexedConcatMap : (Int -> a -> List b) -> List a -> List b
 indexedConcatMap fn list =
     list |> List.indexedMap fn |> List.concat
-
-
-viewScreen : Html msg
-viewScreen =
-    Html.div [] (List.map viewScreenRow screen)
 
 
 viewScreenRow : List String -> Html msg
@@ -110,18 +129,3 @@ viewScreenSpot screenSpot =
 
         _ ->
             Html.text ""
-
-
-isScreenSpace : { x : Int, y : Int } -> Bool
-isScreenSpace spot =
-    List.any ((==) spot) screenSpaces
-
-
-wallSpotColor : String
-wallSpotColor =
-    "#1b1bb5"
-
-
-spaceSpotColor : String
-spaceSpotColor =
-    "#222"

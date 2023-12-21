@@ -14,7 +14,7 @@ import Page exposing (Page)
 import Player exposing (Player)
 import Random
 import Route exposing (Route)
-import Screen exposing (isScreenSpace, screenSize, screenSpaces, screenWalls, spotSize, viewScreen)
+import Screen
 import Set exposing (Set)
 import Shared
 import Time
@@ -196,15 +196,15 @@ updateMonster kanjis targetMonster player monster =
 
 isOverlapping : { a | x : Int, y : Int } -> { b | x : Int, y : Int } -> Bool
 isOverlapping a b =
-    (a.x + spotSize > b.x)
-        && (a.x < b.x + spotSize)
-        && (a.y + spotSize > b.y)
-        && (a.y < b.y + spotSize)
+    (a.x + Screen.spotSize > b.x)
+        && (a.x < b.x + Screen.spotSize)
+        && (a.y + Screen.spotSize > b.y)
+        && (a.y < b.y + Screen.spotSize)
 
 
 isOverlappingWall : { a | x : Int, y : Int } -> Bool
 isOverlappingWall value =
-    List.any (isOverlapping value) screenWalls
+    List.any (isOverlapping value) Screen.walls
 
 
 move : Int -> Direction -> { a | x : Int, y : Int } -> { a | x : Int, y : Int }
@@ -272,12 +272,12 @@ isSamePosition a b =
 
 generateMonsterPath : Monster -> Effect Msg
 generateMonsterPath monster =
-    Random.int 0 (List.length screenSpaces - 1)
+    Random.int 0 (List.length Screen.spaces - 1)
         |> Random.map
             (\i ->
                 let
                     newPath =
-                        case get i screenSpaces of
+                        case get i Screen.spaces of
                             Nothing ->
                                 []
 
@@ -300,7 +300,7 @@ findShortestPath from to =
 
 findShortestPath_ : { x : Int, y : Int } -> { x : Int, y : Int } -> Set ( Int, Int ) -> List { x : Int, y : Int } -> Maybe (List { x : Int, y : Int })
 findShortestPath_ from to visited path =
-    if Set.member ( from.x, from.y ) visited || not (isScreenSpace from) then
+    if Set.member ( from.x, from.y ) visited || not (Screen.isSpace from) then
         Nothing
 
     else if from == to then
@@ -312,7 +312,7 @@ findShortestPath_ from to visited path =
                 case result of
                     Nothing ->
                         findShortestPath_
-                            (move spotSize direction from)
+                            (move Screen.spotSize direction from)
                             to
                             (Set.insert ( from.x, from.y ) visited)
                             (from :: path)
@@ -359,11 +359,11 @@ view model =
             , style "align-items" "center"
             ]
             [ Html.div
-                [ style "width" (px screenSize)
-                , style "height" (px screenSize)
+                [ style "width" (px Screen.size)
+                , style "height" (px Screen.size)
                 , style "position" "relative"
                 ]
-                [ viewScreen
+                [ Screen.view
                 , Player.view model.player
                 , Monsters.view model.monsters
                 ]
