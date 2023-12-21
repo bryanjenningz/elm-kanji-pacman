@@ -5,6 +5,7 @@ import Browser.Events exposing (onKeyDown, onKeyUp)
 import Effect exposing (Effect)
 import Html exposing (Html)
 import Html.Attributes exposing (style)
+import Http
 import Json.Decode as Decode exposing (Decoder)
 import Page exposing (Page)
 import Random
@@ -33,6 +34,7 @@ type alias Model =
     { player : Player
     , monsters : List Monster
     , keysDown : Set String
+    , kanjis : Array Kanji
     }
 
 
@@ -131,9 +133,16 @@ init () =
     ( { player = initPlayer
       , monsters = initMonsters
       , keysDown = Set.empty
+      , kanjis = initKanjis
       }
-    , Effect.none
+    , fetchKanjis
     )
+
+
+fetchKanjis : Effect Msg
+fetchKanjis =
+    Http.get { url = "/heisig-kanji.txt", expect = Http.expectString SetKanjis }
+        |> Effect.sendCmd
 
 
 
@@ -145,6 +154,7 @@ type Msg
     | SetKeyDown String
     | SetKeyUp String
     | GenerateMonsterPath Monster
+    | SetKanjis (Result Http.Error String)
 
 
 update : Msg -> Model -> ( Model, Effect Msg )
@@ -167,6 +177,33 @@ update msg model =
             ( { model | monsters = List.map (replaceMonster newMonster) model.monsters }
             , Effect.none
             )
+
+        SetKanjis (Err _) ->
+            ( model, Effect.none )
+
+        SetKanjis (Ok kanjiText) ->
+            ( { model | kanjis = parseKanjiText kanjiText }
+            , Effect.none
+            )
+
+
+parseKanjiText : String -> Array Kanji
+parseKanjiText kanjiText =
+    kanjiText
+        |> String.split "\n"
+        |> List.filterMap
+            (\line ->
+                case String.split "\t" line of
+                    [ character, meaning ] ->
+                        Just
+                            { character = character
+                            , meaning = meaning
+                            }
+
+                    _ ->
+                        Nothing
+            )
+        |> Array.fromList
 
 
 replaceMonster : Monster -> Monster -> Monster
@@ -226,7 +263,7 @@ updateMonsters model =
             let
                 ( newMonsters, newEffects ) =
                     model.monsters
-                        |> List.map (updateMonster targetMonster model.player)
+                        |> List.map (updateMonster model.kanjis targetMonster model.player)
                         |> partition
             in
             ( List.filterMap identity newMonsters
@@ -241,14 +278,14 @@ partition list =
     )
 
 
-updateMonster : Monster -> Player -> Monster -> ( Maybe Monster, Effect Msg )
-updateMonster targetMonster player monster =
+updateMonster : Array Kanji -> Monster -> Player -> Monster -> ( Maybe Monster, Effect Msg )
+updateMonster kanjis targetMonster player monster =
     if targetMonster == monster && isOverlapping player monster then
         let
             newId =
                 monster.id + List.length initMonsters
         in
-        case Array.get newId initKanjis of
+        case Array.get newId kanjis of
             Nothing ->
                 ( Nothing, Effect.none )
 
