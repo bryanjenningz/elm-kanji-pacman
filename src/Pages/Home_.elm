@@ -503,7 +503,9 @@ view model =
             [ style "min-height" "100vh"
             , style "background-color" "black"
             , style "display" "flex"
-            , style "justify-content" "center"
+            , style "flex-direction" "column"
+            , style "gap" "8px"
+            , style "align-items" "center"
             ]
             [ Html.div
                 [ style "width" (px screenSize)
@@ -514,6 +516,12 @@ view model =
                 , viewPlayer model.player
                 , viewMonsters model.monsters
                 ]
+            , case getTargetMonster model.monsters of
+                Nothing ->
+                    Html.text ""
+
+                Just targetMonster ->
+                    Html.text ("Eat the kanji named \"" ++ targetMonster.kanji.meaning ++ "\"")
             ]
         ]
     }
