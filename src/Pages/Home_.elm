@@ -9,7 +9,7 @@ import Html.Attributes exposing (style)
 import Http
 import Json.Decode as Decode exposing (Decoder)
 import Kanji exposing (Kanji)
-import Monsters exposing (Monster, getTargetMonster, initMonsters, monsterSpeed, replaceMonster, viewMonsters)
+import Monsters exposing (Monster)
 import Page exposing (Page)
 import Player exposing (Player, initPlayer, playerSpeed, viewPlayer)
 import Random
@@ -47,7 +47,7 @@ type alias Model =
 init : () -> ( Model, Effect Msg )
 init () =
     ( { player = initPlayer
-      , monsters = initMonsters
+      , monsters = Monsters.init
       , keysDown = Set.empty
       , kanjis = Kanji.init
       }
@@ -84,7 +84,7 @@ update msg model =
             )
 
         GenerateMonsterPath newMonster ->
-            ( { model | monsters = List.map (replaceMonster newMonster) model.monsters }
+            ( { model | monsters = List.map (Monsters.replace newMonster) model.monsters }
             , Effect.none
             )
 
@@ -137,7 +137,7 @@ updatePlayer ({ player, keysDown } as model) =
 
 updateMonsters : Model -> ( List Monster, Effect Msg )
 updateMonsters model =
-    case getTargetMonster model.monsters of
+    case Monsters.getTarget model.monsters of
         Nothing ->
             ( model.monsters, Effect.none )
 
@@ -165,7 +165,7 @@ updateMonster kanjis targetMonster player monster =
     if targetMonster == monster && isOverlapping player monster then
         let
             newId =
-                monster.id + List.length initMonsters
+                monster.id + List.length Monsters.init
         in
         case Array.get newId kanjis of
             Nothing ->
@@ -228,7 +228,7 @@ moveMonster monster =
             ( monster, generateMonsterPath monster )
 
         Just direction ->
-            ( move monsterSpeed direction monster, Effect.none )
+            ( move Monsters.speed direction monster, Effect.none )
 
 
 monsterDirection : Monster -> Maybe Direction
@@ -365,9 +365,9 @@ view model =
                 ]
                 [ viewScreen
                 , viewPlayer model.player
-                , viewMonsters model.monsters
+                , Monsters.view model.monsters
                 ]
-            , case getTargetMonster model.monsters of
+            , case Monsters.getTarget model.monsters of
                 Nothing ->
                     Html.text ""
 

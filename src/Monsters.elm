@@ -1,4 +1,4 @@
-module Monsters exposing (..)
+module Monsters exposing (Monster, getTarget, init, replace, speed, view)
 
 import Array
 import Html exposing (Html)
@@ -17,8 +17,8 @@ type alias Monster =
     }
 
 
-initMonsters : List Monster
-initMonsters =
+init : List Monster
+init =
     [ { x = 5, y = 3 }
     , { x = 9, y = 3 }
     , { x = 5, y = 7 }
@@ -37,9 +37,32 @@ initMonsters =
             )
 
 
-viewMonsters : List Monster -> Html msg
-viewMonsters monsters =
+view : List Monster -> Html msg
+view monsters =
     Html.div [] (List.map viewMonster monsters)
+
+
+replace : Monster -> Monster -> Monster
+replace newMonster monster =
+    if monster.id == newMonster.id then
+        newMonster
+
+    else
+        monster
+
+
+getTarget : List Monster -> Maybe Monster
+getTarget monsters =
+    List.sortBy .id monsters |> List.head
+
+
+speed : Int
+speed =
+    1
+
+
+
+-- INTERNAL
 
 
 viewMonster : Monster -> Html msg
@@ -47,7 +70,7 @@ viewMonster monster =
     Html.div
         [ style "width" (px spotSize)
         , style "height" (px spotSize)
-        , style "background-color" monsterColor
+        , style "background-color" color
         , style "position" "absolute"
         , style "left" (px monster.x)
         , style "top" (px monster.y)
@@ -58,25 +81,6 @@ viewMonster monster =
         [ Html.text monster.kanji.character ]
 
 
-monsterColor : String
-monsterColor =
+color : String
+color =
     "#000"
-
-
-replaceMonster : Monster -> Monster -> Monster
-replaceMonster newMonster monster =
-    if monster.id == newMonster.id then
-        newMonster
-
-    else
-        monster
-
-
-getTargetMonster : List Monster -> Maybe Monster
-getTargetMonster monsters =
-    List.sortBy .id monsters |> List.head
-
-
-monsterSpeed : Int
-monsterSpeed =
-    1
