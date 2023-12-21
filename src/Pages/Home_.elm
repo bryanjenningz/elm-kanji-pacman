@@ -2,17 +2,23 @@ module Pages.Home_ exposing (Model, Msg, page)
 
 import Array exposing (Array)
 import Browser.Events exposing (onKeyDown, onKeyUp)
+import Direction exposing (Direction(..), directionDeltas, directionFromKeysDown)
 import Effect exposing (Effect)
 import Html exposing (Html)
 import Html.Attributes exposing (style)
 import Http
 import Json.Decode as Decode exposing (Decoder)
+import Kanji exposing (Kanji, fetchKanjis, initKanjis, parseKanjiText)
+import Monsters exposing (Monster, getTargetMonster, initMonsters, monsterSpeed, replaceMonster, viewMonsters)
 import Page exposing (Page)
+import Player exposing (Player, initPlayer, playerSpeed, viewPlayer)
 import Random
 import Route exposing (Route)
+import Screen exposing (isScreenSpace, screenSize, screenSpaces, screenWalls, spotSize, viewScreen)
 import Set exposing (Set)
 import Shared
 import Time
+import Utils exposing (get, px)
 import View exposing (View)
 
 
@@ -38,96 +44,6 @@ type alias Model =
     }
 
 
-
--- PLAYER
-
-
-type alias Player =
-    { x : Int
-    , y : Int
-    , direction : Direction
-    }
-
-
-type Direction
-    = Up
-    | Down
-    | Left
-    | Right
-
-
-initPlayer : Player
-initPlayer =
-    { x = 7 * spotSize
-    , y = 11 * spotSize
-    , direction = Left
-    }
-
-
-
--- MONSTER
-
-
-type alias Monster =
-    { id : Int
-    , x : Int
-    , y : Int
-    , kanji : Kanji
-    , path : List { x : Int, y : Int }
-    }
-
-
-initMonsters : List Monster
-initMonsters =
-    [ { x = 5, y = 3 }
-    , { x = 9, y = 3 }
-    , { x = 5, y = 7 }
-    , { x = 9, y = 7 }
-    ]
-        |> List.indexedMap
-            (\i { x, y } ->
-                { id = i
-                , x = x * spotSize
-                , y = y * spotSize
-                , kanji =
-                    Array.get i initKanjis
-                        |> Maybe.withDefault defaultKanji
-                , path = []
-                }
-            )
-
-
-
--- KANJI
-
-
-type alias Kanji =
-    { character : String
-    , meaning : String
-    }
-
-
-defaultKanji : Kanji
-defaultKanji =
-    { character = "一", meaning = "one" }
-
-
-initKanjis : Array Kanji
-initKanjis =
-    [ defaultKanji
-    , { character = "二", meaning = "two" }
-    , { character = "三", meaning = "three" }
-    , { character = "四", meaning = "four" }
-    , { character = "五", meaning = "five" }
-    , { character = "六", meaning = "six" }
-    , { character = "七", meaning = "seven" }
-    , { character = "八", meaning = "eight" }
-    , { character = "九", meaning = "nine" }
-    , { character = "十", meaning = "ten" }
-    ]
-        |> Array.fromList
-
-
 init : () -> ( Model, Effect Msg )
 init () =
     ( { player = initPlayer
@@ -135,14 +51,8 @@ init () =
       , keysDown = Set.empty
       , kanjis = initKanjis
       }
-    , fetchKanjis
+    , fetchKanjis SetKanjis
     )
-
-
-fetchKanjis : Effect Msg
-fetchKanjis =
-    Http.get { url = "/heisig-kanji.txt", expect = Http.expectString SetKanjis }
-        |> Effect.sendCmd
 
 
 
@@ -185,34 +95,6 @@ update msg model =
             ( { model | kanjis = parseKanjiText kanjiText }
             , Effect.none
             )
-
-
-parseKanjiText : String -> Array Kanji
-parseKanjiText kanjiText =
-    kanjiText
-        |> String.split "\n"
-        |> List.filterMap
-            (\line ->
-                case String.split "\t" line of
-                    [ character, meaning ] ->
-                        Just
-                            { character = character
-                            , meaning = meaning
-                            }
-
-                    _ ->
-                        Nothing
-            )
-        |> Array.fromList
-
-
-replaceMonster : Monster -> Monster -> Monster
-replaceMonster newMonster monster =
-    if monster.id == newMonster.id then
-        newMonster
-
-    else
-        monster
 
 
 updateLoop : Model -> ( Model, Effect Msg )
@@ -310,29 +192,6 @@ updateMonster kanjis targetMonster player monster =
                 else
                     moveMonster monster
                         |> Tuple.mapFirst Just
-
-
-getTargetMonster : List Monster -> Maybe Monster
-getTargetMonster monsters =
-    List.sortBy .id monsters |> List.head
-
-
-directionFromKeysDown : Set String -> Maybe Direction
-directionFromKeysDown keysDown =
-    if Set.member "ArrowUp" keysDown then
-        Just Up
-
-    else if Set.member "ArrowDown" keysDown then
-        Just Down
-
-    else if Set.member "ArrowLeft" keysDown then
-        Just Left
-
-    else if Set.member "ArrowRight" keysDown then
-        Just Right
-
-    else
-        Nothing
 
 
 isOverlapping : { a | x : Int, y : Int } -> { b | x : Int, y : Int } -> Bool
@@ -465,51 +324,6 @@ findShortestPath_ from to visited path =
             [ Up, Down, Left, Right ]
 
 
-isScreenSpace : { x : Int, y : Int } -> Bool
-isScreenSpace spot =
-    List.any ((==) spot) screenSpaces
-
-
-get : Int -> List a -> Maybe a
-get i list =
-    case list of
-        [] ->
-            Nothing
-
-        first :: rest ->
-            if i <= 0 then
-                Just first
-
-            else
-                get (i - 1) rest
-
-
-playerSpeed : Int
-playerSpeed =
-    2
-
-
-monsterSpeed : Int
-monsterSpeed =
-    1
-
-
-directionDeltas : Direction -> { dx : Int, dy : Int }
-directionDeltas direction =
-    case direction of
-        Up ->
-            { dx = 0, dy = -1 }
-
-        Down ->
-            { dx = 0, dy = 1 }
-
-        Left ->
-            { dx = -1, dy = 0 }
-
-        Right ->
-            { dx = 1, dy = 0 }
-
-
 
 -- SUBSCRIPTIONS
 
@@ -562,181 +376,3 @@ view model =
             ]
         ]
     }
-
-
-
--- SCREEN
-
-
-screenSize : Int
-screenSize =
-    300
-
-
-spotSize : Int
-spotSize =
-    20
-
-
-screen : List (List String)
-screen =
-    [ "###############"
-    , "#      #      #"
-    , "# #### # #### #"
-    , "#             #"
-    , "## ## # # ## ##"
-    , "#             #"
-    , "# ### # # ### #"
-    , "#             #"
-    , "# #### # #### #"
-    , "#    #   #    #"
-    , "## # ## ## # ##"
-    , "#  #       #  #"
-    , "# #### # #### #"
-    , "#             #"
-    , "###############"
-    ]
-        |> List.map (String.split "")
-
-
-spaceSpot : String
-spaceSpot =
-    " "
-
-
-wallSpot : String
-wallSpot =
-    "#"
-
-
-screenSpots : String -> List { x : Int, y : Int }
-screenSpots spot =
-    screen
-        |> indexedConcatMap
-            (\y row ->
-                row
-                    |> indexedConcatMap
-                        (\x screenSpot ->
-                            if screenSpot == spot then
-                                [ { x = x * spotSize, y = y * spotSize } ]
-
-                            else
-                                []
-                        )
-            )
-
-
-screenSpaces : List { x : Int, y : Int }
-screenSpaces =
-    screenSpots spaceSpot
-
-
-screenWalls : List { x : Int, y : Int }
-screenWalls =
-    screenSpots wallSpot
-
-
-indexedConcatMap : (Int -> a -> List b) -> List a -> List b
-indexedConcatMap fn list =
-    list |> List.indexedMap fn |> List.concat
-
-
-viewScreen : Html msg
-viewScreen =
-    Html.div [] (List.map viewScreenRow screen)
-
-
-viewScreenRow : List String -> Html msg
-viewScreenRow screenRow =
-    Html.div [ style "display" "flex" ]
-        (List.map viewScreenSpot screenRow)
-
-
-viewScreenSpot : String -> Html msg
-viewScreenSpot screenSpot =
-    case screenSpot of
-        "#" ->
-            Html.div
-                [ style "width" (px spotSize)
-                , style "height" (px spotSize)
-                , style "background-color" wallSpotColor
-                ]
-                []
-
-        " " ->
-            Html.div
-                [ style "width" (px spotSize)
-                , style "height" (px spotSize)
-                , style "background-color" spaceSpotColor
-                ]
-                []
-
-        _ ->
-            Html.text ""
-
-
-wallSpotColor : String
-wallSpotColor =
-    "#1b1bb5"
-
-
-spaceSpotColor : String
-spaceSpotColor =
-    "#222"
-
-
-px : Int -> String
-px x =
-    String.fromInt x ++ "px"
-
-
-
--- PLAYER
-
-
-viewPlayer : Player -> Html msg
-viewPlayer player =
-    Html.div
-        [ style "position" "absolute"
-        , style "background-color" playerColor
-        , style "width" (px spotSize)
-        , style "height" (px spotSize)
-        , style "left" (px player.x)
-        , style "top" (px player.y)
-        ]
-        []
-
-
-playerColor : String
-playerColor =
-    "#1678aa"
-
-
-
--- MONSTERS
-
-
-viewMonsters : List Monster -> Html msg
-viewMonsters monsters =
-    Html.div [] (List.map viewMonster monsters)
-
-
-viewMonster : Monster -> Html msg
-viewMonster monster =
-    Html.div
-        [ style "width" (px spotSize)
-        , style "height" (px spotSize)
-        , style "background-color" monsterColor
-        , style "position" "absolute"
-        , style "left" (px monster.x)
-        , style "top" (px monster.y)
-        , style "display" "flex"
-        , style "justify-content" "center"
-        , style "align-items" "center"
-        ]
-        [ Html.text monster.kanji.character ]
-
-
-monsterColor : String
-monsterColor =
-    "#000"
