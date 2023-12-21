@@ -1,7 +1,7 @@
 module Player exposing (Player, init, speed, view)
 
 import Direction exposing (Direction(..))
-import Html exposing (Html)
+import Html exposing (Html, div)
 import Html.Attributes exposing (style)
 import Screen exposing (spotSize)
 import Utils exposing (px)
@@ -24,7 +24,7 @@ init =
 
 view : Player -> Html msg
 view player =
-    Html.div
+    div
         [ style "position" "absolute"
         , style "background-color" color
         , style "width" (px spotSize)

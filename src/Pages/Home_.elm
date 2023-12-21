@@ -4,7 +4,7 @@ import Array exposing (Array)
 import Browser.Events exposing (onKeyDown, onKeyUp)
 import Direction exposing (Direction(..))
 import Effect exposing (Effect)
-import Html exposing (Html)
+import Html exposing (Html, div, text)
 import Html.Attributes exposing (style)
 import Http
 import Json.Decode as Decode exposing (Decoder)
@@ -285,7 +285,7 @@ view : Model -> View Msg
 view model =
     { title = "Elm Kanji Pac-Man"
     , body =
-        [ Html.div
+        [ div
             [ style "min-height" "100vh"
             , style "background-color" "black"
             , style "display" "flex"
@@ -293,7 +293,7 @@ view model =
             , style "gap" "8px"
             , style "align-items" "center"
             ]
-            [ Html.div
+            [ div
                 [ style "width" (px Screen.size)
                 , style "height" (px Screen.size)
                 , style "position" "relative"
@@ -304,10 +304,10 @@ view model =
                 ]
             , case Monsters.getTarget model.monsters of
                 Nothing ->
-                    Html.text ""
+                    text ""
 
                 Just targetMonster ->
-                    Html.text ("Eat the kanji named \"" ++ targetMonster.kanji.meaning ++ "\"")
+                    text ("Eat the kanji named \"" ++ targetMonster.kanji.meaning ++ "\"")
             ]
         ]
     }

@@ -1,6 +1,6 @@
 module Screen exposing (isSpace, size, spaces, spotSize, view, walls)
 
-import Html exposing (Html)
+import Html exposing (Html, div, text)
 import Html.Attributes exposing (style)
 import Utils exposing (px)
 
@@ -27,7 +27,7 @@ walls =
 
 view : Html msg
 view =
-    Html.div [] (List.map viewScreenRow screen)
+    div [] (List.map viewScreenRow screen)
 
 
 isSpace : { x : Int, y : Int } -> Bool
@@ -104,7 +104,7 @@ indexedConcatMap fn list =
 
 viewScreenRow : List String -> Html msg
 viewScreenRow screenRow =
-    Html.div [ style "display" "flex" ]
+    div [ style "display" "flex" ]
         (List.map viewScreenSpot screenRow)
 
 
@@ -112,7 +112,7 @@ viewScreenSpot : String -> Html msg
 viewScreenSpot screenSpot =
     case screenSpot of
         "#" ->
-            Html.div
+            div
                 [ style "width" (px spotSize)
                 , style "height" (px spotSize)
                 , style "background-color" wallSpotColor
@@ -120,7 +120,7 @@ viewScreenSpot screenSpot =
                 []
 
         " " ->
-            Html.div
+            div
                 [ style "width" (px spotSize)
                 , style "height" (px spotSize)
                 , style "background-color" spaceSpotColor
@@ -128,4 +128,4 @@ viewScreenSpot screenSpot =
                 []
 
         _ ->
-            Html.text ""
+            text ""

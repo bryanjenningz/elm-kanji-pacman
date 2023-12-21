@@ -1,7 +1,7 @@
 module Monsters exposing (Monster, getTarget, init, replace, speed, view)
 
 import Array
-import Html exposing (Html)
+import Html exposing (Html, div, text)
 import Html.Attributes exposing (style)
 import Kanji exposing (Kanji)
 import Screen exposing (spotSize)
@@ -39,7 +39,7 @@ init =
 
 view : List Monster -> Html msg
 view monsters =
-    Html.div [] (List.map viewMonster monsters)
+    div [] (List.map viewMonster monsters)
 
 
 replace : Monster -> Monster -> Monster
@@ -67,7 +67,7 @@ speed =
 
 viewMonster : Monster -> Html msg
 viewMonster monster =
-    Html.div
+    div
         [ style "width" (px spotSize)
         , style "height" (px spotSize)
         , style "background-color" color
@@ -78,7 +78,7 @@ viewMonster monster =
         , style "justify-content" "center"
         , style "align-items" "center"
         ]
-        [ Html.text monster.kanji.character ]
+        [ text monster.kanji.character ]
 
 
 color : String
