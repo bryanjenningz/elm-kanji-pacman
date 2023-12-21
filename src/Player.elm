@@ -1,4 +1,4 @@
-module Player exposing (..)
+module Player exposing (Player, init, speed, view)
 
 import Direction exposing (Direction(..))
 import Html exposing (Html)
@@ -14,19 +14,19 @@ type alias Player =
     }
 
 
-initPlayer : Player
-initPlayer =
+init : Player
+init =
     { x = 7 * spotSize
     , y = 11 * spotSize
     , direction = Left
     }
 
 
-viewPlayer : Player -> Html msg
-viewPlayer player =
+view : Player -> Html msg
+view player =
     Html.div
         [ style "position" "absolute"
-        , style "background-color" playerColor
+        , style "background-color" color
         , style "width" (px spotSize)
         , style "height" (px spotSize)
         , style "left" (px player.x)
@@ -35,11 +35,15 @@ viewPlayer player =
         []
 
 
-playerColor : String
-playerColor =
-    "#1678aa"
-
-
-playerSpeed : Int
-playerSpeed =
+speed : Int
+speed =
     2
+
+
+
+-- INTERNAL
+
+
+color : String
+color =
+    "#1678aa"

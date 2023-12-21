@@ -11,7 +11,7 @@ import Json.Decode as Decode exposing (Decoder)
 import Kanji exposing (Kanji)
 import Monsters exposing (Monster)
 import Page exposing (Page)
-import Player exposing (Player, initPlayer, playerSpeed, viewPlayer)
+import Player exposing (Player)
 import Random
 import Route exposing (Route)
 import Screen exposing (isScreenSpace, screenSize, screenSpaces, screenWalls, spotSize, viewScreen)
@@ -46,7 +46,7 @@ type alias Model =
 
 init : () -> ( Model, Effect Msg )
 init () =
-    ( { player = initPlayer
+    ( { player = Player.init
       , monsters = Monsters.init
       , keysDown = Set.empty
       , kanjis = Kanji.init
@@ -218,7 +218,7 @@ move speed direction value =
 
 movePlayer : Player -> Player
 movePlayer player =
-    move playerSpeed player.direction player
+    move Player.speed player.direction player
 
 
 moveMonster : Monster -> ( Monster, Effect Msg )
@@ -364,7 +364,7 @@ view model =
                 , style "position" "relative"
                 ]
                 [ viewScreen
-                , viewPlayer model.player
+                , Player.view model.player
                 , Monsters.view model.monsters
                 ]
             , case Monsters.getTarget model.monsters of
