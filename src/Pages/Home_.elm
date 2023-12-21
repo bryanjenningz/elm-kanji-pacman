@@ -163,21 +163,19 @@ update msg model =
             , Effect.none
             )
 
-        GenerateMonsterPath monster ->
-            ( { model
-                | monsters =
-                    List.map
-                        (\m ->
-                            if m.id == monster.id then
-                                monster
-
-                            else
-                                m
-                        )
-                        model.monsters
-              }
+        GenerateMonsterPath newMonster ->
+            ( { model | monsters = List.map (replaceMonster newMonster) model.monsters }
             , Effect.none
             )
+
+
+replaceMonster : Monster -> Monster -> Monster
+replaceMonster newMonster monster =
+    if monster.id == newMonster.id then
+        newMonster
+
+    else
+        monster
 
 
 updateLoop : Model -> ( Model, Effect Msg )
