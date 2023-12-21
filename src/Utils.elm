@@ -1,4 +1,4 @@
-module Utils exposing (..)
+module Utils exposing (get, px)
 
 
 px : Int -> String

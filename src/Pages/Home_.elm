@@ -12,6 +12,7 @@ import Kanji exposing (Kanji)
 import Monsters exposing (Monster)
 import Page exposing (Page)
 import Player exposing (Player)
+import Position
 import Random
 import Route exposing (Route)
 import Screen
@@ -184,7 +185,7 @@ updateMonster kanjis targetMonster player monster =
                 )
 
             nextStep :: remPath ->
-                if isSamePosition nextStep monster then
+                if Position.equals nextStep monster then
                     ( Just { monster | path = remPath }
                     , Effect.none
                     )
@@ -207,18 +208,9 @@ isOverlappingWall value =
     List.any (isOverlapping value) Screen.walls
 
 
-move : Int -> Direction -> { a | x : Int, y : Int } -> { a | x : Int, y : Int }
-move speed direction value =
-    let
-        { dx, dy } =
-            Direction.toDeltas direction
-    in
-    { value | x = value.x + dx * speed, y = value.y + dy * speed }
-
-
 movePlayer : Player -> Player
 movePlayer player =
-    move Player.speed player.direction player
+    Position.move Player.speed player.direction player
 
 
 moveMonster : Monster -> ( Monster, Effect Msg )
@@ -228,7 +220,7 @@ moveMonster monster =
             ( monster, generateMonsterPath monster )
 
         Just direction ->
-            ( move Monsters.speed direction monster, Effect.none )
+            ( Position.move Monsters.speed direction monster, Effect.none )
 
 
 monsterDirection : Monster -> Maybe Direction
@@ -238,7 +230,7 @@ monsterDirection monster =
             Nothing
 
         nextStep :: remPath ->
-            if isSamePosition nextStep monster then
+            if Position.equals nextStep monster then
                 monsterDirection { monster | path = remPath }
 
             else
@@ -265,11 +257,6 @@ monsterDirection monster =
                     Nothing
 
 
-isSamePosition : { a | x : Int, y : Int } -> { b | x : Int, y : Int } -> Bool
-isSamePosition a b =
-    a.x == b.x && a.y == b.y
-
-
 generateMonsterPath : Monster -> Effect Msg
 generateMonsterPath monster =
     Random.int 0 (List.length Screen.spaces - 1)
@@ -282,7 +269,7 @@ generateMonsterPath monster =
                                 []
 
                             Just newDestination ->
-                                findShortestPath
+                                Position.shortestPath
                                     { x = monster.x, y = monster.y }
                                     newDestination
                 in
@@ -290,38 +277,6 @@ generateMonsterPath monster =
             )
         |> Random.generate GenerateMonsterPath
         |> Effect.sendCmd
-
-
-findShortestPath : { x : Int, y : Int } -> { x : Int, y : Int } -> List { x : Int, y : Int }
-findShortestPath from to =
-    findShortestPath_ from to Set.empty []
-        |> Maybe.withDefault []
-
-
-findShortestPath_ : { x : Int, y : Int } -> { x : Int, y : Int } -> Set ( Int, Int ) -> List { x : Int, y : Int } -> Maybe (List { x : Int, y : Int })
-findShortestPath_ from to visited path =
-    if Set.member ( from.x, from.y ) visited || not (Screen.isSpace from) then
-        Nothing
-
-    else if from == to then
-        Just (List.reverse path)
-
-    else
-        List.foldl
-            (\direction result ->
-                case result of
-                    Nothing ->
-                        findShortestPath_
-                            (move Screen.spotSize direction from)
-                            to
-                            (Set.insert ( from.x, from.y ) visited)
-                            (from :: path)
-
-                    Just resultPath ->
-                        Just resultPath
-            )
-            Nothing
-            [ Up, Down, Left, Right ]
 
 
 
