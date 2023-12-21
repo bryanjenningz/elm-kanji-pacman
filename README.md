@@ -1,5 +1,12 @@
-# elm-kanji-pacman
-> Built with [Elm Land](https://elm.land) 🌈
+# Elm Kanji Pacman
+
+Learn Kanji by playing Pac-Man!
+
+Built with [Elm](https://elm-lang.org) and [Elm Land](https://elm.land).
+
+## Screenshots
+
+<img width="350" src="./screenshot.png" alt="">
 
 ## Local development
 
@@ -8,9 +15,7 @@
 npx elm-land server
 ```
 
-## Deploying to production
+## Credits
 
-Elm Land projects are most commonly deployed as static websites. 
-
-Please visit [the "Deployment" guide](https://elm.land/guide/deploying) to learn more
-about deploying your app for free using Netlify or Vercel.
+- [Pac-Man](https://en.wikipedia.org/wiki/Pac-Man) for design inspiration
+- Heisig's [Remembering the Kanji](https://en.wikipedia.org/wiki/Remembering_the_Kanji_and_Remembering_the_Hanzi) for kanji ordering and definitions
