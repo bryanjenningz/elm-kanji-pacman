@@ -1,11 +1,23 @@
 module Gameboy exposing (view)
 
-import Html exposing (Html, div)
+import Direction exposing (Direction(..))
+import Html exposing (Html, button, div)
 import Html.Attributes exposing (style)
+import Html.Events exposing (onClick, onMouseDown, onMouseUp)
 
 
-view : Html msg
-view =
+type alias Controls msg =
+    { onPadDown : Direction -> msg
+    , onPadUp : Direction -> msg
+    , onClickA : msg
+    , onClickB : msg
+    , onClickStart : msg
+    , onClickSelect : msg
+    }
+
+
+view : Controls msg -> Html msg
+view controls =
     div
         [ style "width" "350px"
         , style "height" "500px"
@@ -64,7 +76,27 @@ view =
                         , style "background-color" "black"
                         , style "border-radius" "16px"
                         ]
-                        []
+                        [ button
+                            [ style "position" "absolute"
+                            , style "top" "0"
+                            , style "bottom" "0"
+                            , style "left" "0"
+                            , style "width" "30px"
+                            , onMouseDown (controls.onPadDown Left)
+                            , onMouseUp (controls.onPadUp Left)
+                            ]
+                            []
+                        , button
+                            [ style "position" "absolute"
+                            , style "top" "0"
+                            , style "bottom" "0"
+                            , style "right" "0"
+                            , style "width" "30px"
+                            , onMouseDown (controls.onPadDown Right)
+                            , onMouseUp (controls.onPadUp Right)
+                            ]
+                            []
+                        ]
                     , div
                         [ style "position" "absolute"
                         , style "left" "35px"
@@ -73,7 +105,27 @@ view =
                         , style "background-color" "black"
                         , style "border-radius" "16px"
                         ]
-                        []
+                        [ button
+                            [ style "position" "absolute"
+                            , style "top" "0"
+                            , style "left" "0"
+                            , style "right" "0"
+                            , style "height" "30px"
+                            , onMouseDown (controls.onPadDown Up)
+                            , onMouseUp (controls.onPadUp Up)
+                            ]
+                            []
+                        , button
+                            [ style "position" "absolute"
+                            , style "bottom" "0"
+                            , style "left" "0"
+                            , style "right" "0"
+                            , style "height" "30px"
+                            , onMouseDown (controls.onPadDown Down)
+                            , onMouseUp (controls.onPadUp Down)
+                            ]
+                            []
+                        ]
                     ]
 
                 -- GAMEBOY RIGHT BUTTONS
@@ -82,16 +134,17 @@ view =
                     , style "width" "100px"
                     , style "height" "100px"
                     ]
-                    [ div
+                    [ button
                         [ style "position" "absolute"
                         , style "top" "45px"
                         , style "width" "45px"
                         , style "height" "45px"
                         , style "background-color" "black"
                         , style "border-radius" "40px"
+                        , onClick controls.onClickB
                         ]
                         []
-                    , div
+                    , button
                         [ style "position" "absolute"
                         , style "top" "10px"
                         , style "right" "0px"
@@ -99,6 +152,7 @@ view =
                         , style "height" "45px"
                         , style "background-color" "black"
                         , style "border-radius" "40px"
+                        , onClick controls.onClickA
                         ]
                         []
                     ]
@@ -111,18 +165,20 @@ view =
                 , style "justify-content" "center"
                 , style "gap" "20px"
                 ]
-                [ div
+                [ button
                     [ style "width" "40px"
                     , style "height" "15px"
                     , style "background-color" "black"
                     , style "border-radius" "20px"
+                    , onClick controls.onClickSelect
                     ]
                     []
-                , div
+                , button
                     [ style "width" "40px"
                     , style "height" "15px"
                     , style "background-color" "black"
                     , style "border-radius" "20px"
+                    , onClick controls.onClickStart
                     ]
                     []
                 ]
