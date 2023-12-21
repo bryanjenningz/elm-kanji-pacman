@@ -3,7 +3,7 @@ module Monsters exposing (..)
 import Array
 import Html exposing (Html)
 import Html.Attributes exposing (style)
-import Kanji exposing (Kanji, defaultKanji, initKanjis)
+import Kanji exposing (Kanji)
 import Screen exposing (spotSize)
 import Utils exposing (px)
 
@@ -30,8 +30,8 @@ initMonsters =
                 , x = x * spotSize
                 , y = y * spotSize
                 , kanji =
-                    Array.get i initKanjis
-                        |> Maybe.withDefault defaultKanji
+                    Array.get i Kanji.init
+                        |> Maybe.withDefault Kanji.default
                 , path = []
                 }
             )

@@ -1,4 +1,4 @@
-module Kanji exposing (..)
+module Kanji exposing (Kanji, default, fetch, init, parse)
 
 import Array exposing (Array)
 import Effect exposing (Effect)
@@ -11,14 +11,14 @@ type alias Kanji =
     }
 
 
-defaultKanji : Kanji
-defaultKanji =
+default : Kanji
+default =
     { character = "一", meaning = "one" }
 
 
-initKanjis : Array Kanji
-initKanjis =
-    [ defaultKanji
+init : Array Kanji
+init =
+    [ default
     , { character = "二", meaning = "two" }
     , { character = "三", meaning = "three" }
     , { character = "四", meaning = "four" }
@@ -32,14 +32,14 @@ initKanjis =
         |> Array.fromList
 
 
-fetchKanjis : (Result Http.Error String -> msg) -> Effect msg
-fetchKanjis toMsg =
+fetch : (Result Http.Error String -> msg) -> Effect msg
+fetch toMsg =
     Http.get { url = "/heisig-kanji.txt", expect = Http.expectString toMsg }
         |> Effect.sendCmd
 
 
-parseKanjiText : String -> Array Kanji
-parseKanjiText kanjiText =
+parse : String -> Array Kanji
+parse kanjiText =
     kanjiText
         |> String.split "\n"
         |> List.filterMap

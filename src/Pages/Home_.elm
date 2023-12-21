@@ -8,7 +8,7 @@ import Html exposing (Html)
 import Html.Attributes exposing (style)
 import Http
 import Json.Decode as Decode exposing (Decoder)
-import Kanji exposing (Kanji, fetchKanjis, initKanjis, parseKanjiText)
+import Kanji exposing (Kanji)
 import Monsters exposing (Monster, getTargetMonster, initMonsters, monsterSpeed, replaceMonster, viewMonsters)
 import Page exposing (Page)
 import Player exposing (Player, initPlayer, playerSpeed, viewPlayer)
@@ -49,9 +49,9 @@ init () =
     ( { player = initPlayer
       , monsters = initMonsters
       , keysDown = Set.empty
-      , kanjis = initKanjis
+      , kanjis = Kanji.init
       }
-    , fetchKanjis SetKanjis
+    , Kanji.fetch SetKanjis
     )
 
 
@@ -92,7 +92,7 @@ update msg model =
             ( model, Effect.none )
 
         SetKanjis (Ok kanjiText) ->
-            ( { model | kanjis = parseKanjiText kanjiText }
+            ( { model | kanjis = Kanji.parse kanjiText }
             , Effect.none
             )
 
