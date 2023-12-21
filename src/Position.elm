@@ -1,4 +1,4 @@
-module Position exposing (equals, move, shortestPath)
+module Position exposing (equals, isOverlapping, isOverlappingWall, move, shortestPath)
 
 import Direction exposing (Direction(..))
 import Screen
@@ -23,6 +23,19 @@ shortestPath : { x : Int, y : Int } -> { x : Int, y : Int } -> List { x : Int, y
 shortestPath from to =
     shortestPath_ from to Set.empty []
         |> Maybe.withDefault []
+
+
+isOverlapping : { a | x : Int, y : Int } -> { b | x : Int, y : Int } -> Bool
+isOverlapping a b =
+    (a.x + Screen.spotSize > b.x)
+        && (a.x < b.x + Screen.spotSize)
+        && (a.y + Screen.spotSize > b.y)
+        && (a.y < b.y + Screen.spotSize)
+
+
+isOverlappingWall : { a | x : Int, y : Int } -> Bool
+isOverlappingWall value =
+    List.any (isOverlapping value) Screen.walls
 
 
 

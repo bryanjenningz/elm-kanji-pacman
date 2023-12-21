@@ -120,14 +120,14 @@ updatePlayer ({ player, keysDown } as model) =
                 |> Maybe.withDefault player.direction
 
         playerWithNewDirection =
-            if isOverlappingWall (movePlayer { player | direction = newDirection }) then
+            if Position.isOverlappingWall (movePlayer { player | direction = newDirection }) then
                 player
 
             else
                 { player | direction = newDirection }
 
         newPlayer =
-            if isOverlappingWall (movePlayer playerWithNewDirection) then
+            if Position.isOverlappingWall (movePlayer playerWithNewDirection) then
                 playerWithNewDirection
 
             else
@@ -163,7 +163,7 @@ partition list =
 
 updateMonster : Array Kanji -> Monster -> Player -> Monster -> ( Maybe Monster, Effect Msg )
 updateMonster kanjis targetMonster player monster =
-    if targetMonster == monster && isOverlapping player monster then
+    if targetMonster == monster && Position.isOverlapping player monster then
         let
             newId =
                 monster.id + List.length Monsters.init
@@ -193,19 +193,6 @@ updateMonster kanjis targetMonster player monster =
                 else
                     moveMonster monster
                         |> Tuple.mapFirst Just
-
-
-isOverlapping : { a | x : Int, y : Int } -> { b | x : Int, y : Int } -> Bool
-isOverlapping a b =
-    (a.x + Screen.spotSize > b.x)
-        && (a.x < b.x + Screen.spotSize)
-        && (a.y + Screen.spotSize > b.y)
-        && (a.y < b.y + Screen.spotSize)
-
-
-isOverlappingWall : { a | x : Int, y : Int } -> Bool
-isOverlappingWall value =
-    List.any (isOverlapping value) Screen.walls
 
 
 movePlayer : Player -> Player
