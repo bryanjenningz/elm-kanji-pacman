@@ -1,4 +1,4 @@
-module Utils exposing (get, px)
+module Utils exposing (get, partition, px)
 
 
 px : Int -> String
@@ -18,3 +18,10 @@ get i list =
 
             else
                 get (i - 1) rest
+
+
+partition : List ( a, b ) -> ( List a, List b )
+partition list =
+    ( List.map Tuple.first list
+    , List.map Tuple.second list
+    )

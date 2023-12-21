@@ -19,7 +19,7 @@ import Screen
 import Set exposing (Set)
 import Shared
 import Time
-import Utils exposing (get, px)
+import Utils exposing (get, partition, px)
 import View exposing (View)
 
 
@@ -152,13 +152,6 @@ updateMonsters model =
             ( List.filterMap identity newMonsters
             , Effect.batch newEffects
             )
-
-
-partition : List ( a, b ) -> ( List a, List b )
-partition list =
-    ( List.map Tuple.first list
-    , List.map Tuple.second list
-    )
 
 
 updateMonster : Array Kanji -> Monster -> Player -> Monster -> ( Maybe Monster, Effect Msg )
