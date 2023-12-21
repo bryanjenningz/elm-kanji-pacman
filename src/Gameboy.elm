@@ -16,8 +16,8 @@ type alias Controls msg =
     }
 
 
-view : Controls msg -> Html msg
-view controls =
+view : Controls msg -> Html msg -> Html msg
+view controls screen =
     div
         [ style "width" "350px"
         , style "height" "500px"
@@ -44,8 +44,9 @@ view controls =
                 , style "height" "200px"
                 , style "background-color" "#333"
                 , style "border-radius" "16px"
+                , style "position" "relative"
                 ]
-                []
+                [ screen ]
             ]
 
         -- GAMEBOY BOTTOM
