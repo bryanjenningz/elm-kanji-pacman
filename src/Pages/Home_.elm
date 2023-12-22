@@ -291,7 +291,7 @@ view model =
     { title = "Elm Kanji Pac-Man"
     , body =
         [ div
-            [ style "min-height" "100vh"
+            [ style "min-height" "100dvh"
             , style "background-color" "black"
             , style "display" "flex"
             , style "flex-direction" "column"
