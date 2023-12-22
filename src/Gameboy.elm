@@ -83,11 +83,11 @@ view controls screen =
                     ]
                     [ div
                         [ style "position" "absolute"
-                        , style "top" "35px"
+                        , style "top" "30px"
                         , style "width" "100px"
-                        , style "height" "30px"
+                        , style "height" "40px"
                         , style "background-color" "black"
-                        , style "border-radius" "16px"
+                        , style "border-radius" "99px"
                         , style "overflow" "hidden"
                         ]
                         [ button
@@ -95,7 +95,7 @@ view controls screen =
                             , style "top" "0"
                             , style "bottom" "0"
                             , style "left" "0"
-                            , style "width" "30px"
+                            , style "width" "40px"
                             , onMouseDown (controls.onPadDown Left)
                             , onMouseUp (controls.onPadUp Left)
                             , onTouchStart (controls.onPadDown Left)
@@ -107,7 +107,7 @@ view controls screen =
                             , style "top" "0"
                             , style "bottom" "0"
                             , style "right" "0"
-                            , style "width" "30px"
+                            , style "width" "40px"
                             , onMouseDown (controls.onPadDown Right)
                             , onMouseUp (controls.onPadUp Right)
                             , onTouchStart (controls.onPadDown Right)
@@ -117,11 +117,11 @@ view controls screen =
                         ]
                     , div
                         [ style "position" "absolute"
-                        , style "left" "35px"
-                        , style "width" "30px"
+                        , style "left" "30px"
+                        , style "width" "40px"
                         , style "height" "100px"
                         , style "background-color" "black"
-                        , style "border-radius" "16px"
+                        , style "border-radius" "99px"
                         , style "overflow" "hidden"
                         ]
                         [ button
@@ -129,7 +129,7 @@ view controls screen =
                             , style "top" "0"
                             , style "left" "0"
                             , style "right" "0"
-                            , style "height" "30px"
+                            , style "height" "40px"
                             , onMouseDown (controls.onPadDown Up)
                             , onMouseUp (controls.onPadUp Up)
                             , onTouchStart (controls.onPadDown Up)
@@ -141,7 +141,7 @@ view controls screen =
                             , style "bottom" "0"
                             , style "left" "0"
                             , style "right" "0"
-                            , style "height" "30px"
+                            , style "height" "40px"
                             , onMouseDown (controls.onPadDown Down)
                             , onMouseUp (controls.onPadUp Down)
                             , onTouchStart (controls.onPadDown Down)
@@ -160,10 +160,10 @@ view controls screen =
                     [ button
                         [ style "position" "absolute"
                         , style "top" "45px"
-                        , style "width" "45px"
-                        , style "height" "45px"
+                        , style "width" "50px"
+                        , style "height" "50px"
                         , style "background-color" "black"
-                        , style "border-radius" "40px"
+                        , style "border-radius" "99px"
                         , onClick controls.onClickB
                         ]
                         []
@@ -171,10 +171,10 @@ view controls screen =
                         [ style "position" "absolute"
                         , style "top" "10px"
                         , style "right" "0px"
-                        , style "width" "45px"
-                        , style "height" "45px"
+                        , style "width" "50px"
+                        , style "height" "50px"
                         , style "background-color" "black"
-                        , style "border-radius" "40px"
+                        , style "border-radius" "99px"
                         , onClick controls.onClickA
                         ]
                         []
