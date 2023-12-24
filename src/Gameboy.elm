@@ -56,8 +56,8 @@ type alias Size =
 
 buttonPadSize : Size
 buttonPadSize =
-    { width = 30
-    , height = 30
+    { width = 50
+    , height = 50
     }
 
 
@@ -68,28 +68,28 @@ buttonPadSize =
 
 upButtonRectangle : Rectangle
 upButtonRectangle =
-    { position = { x = 90, y = 290 }
+    { position = { x = 80, y = 280 }
     , size = buttonPadSize
     }
 
 
 downButtonRectangle : Rectangle
 downButtonRectangle =
-    { position = { x = 90, y = 376 }
+    { position = { x = 80, y = 360 }
     , size = buttonPadSize
     }
 
 
 leftButtonRectangle : Rectangle
 leftButtonRectangle =
-    { position = { x = 57, y = 331 }
+    { position = { x = 40, y = 320 }
     , size = buttonPadSize
     }
 
 
 rightButtonRectangle : Rectangle
 rightButtonRectangle =
-    { position = { x = 130, y = 336 }
+    { position = { x = 120, y = 320 }
     , size = buttonPadSize
     }
 
