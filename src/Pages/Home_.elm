@@ -347,7 +347,13 @@ view model =
 
                 Just targetMonster ->
                     text ("Eat the kanji named \"" ++ targetMonster.kanji.meaning ++ "\"")
-            , Html.p [] [ text (Debug.toString model.arrowKeyDown) ]
+            , Html.p []
+                [ text
+                    (model.arrowKeyDown
+                        |> Maybe.map Direction.toString
+                        |> Maybe.withDefault ""
+                    )
+                ]
             ]
         ]
     }

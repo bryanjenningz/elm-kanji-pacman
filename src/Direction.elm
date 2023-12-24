@@ -1,4 +1,4 @@
-module Direction exposing (Direction(..), fromArrowKey, toArrowKey, toDeltas)
+module Direction exposing (Direction(..), fromArrowKey, toArrowKey, toDeltas, toString)
 
 import Set exposing (Set)
 
@@ -58,3 +58,19 @@ toDeltas direction =
 
         Right ->
             { dx = 1, dy = 0 }
+
+
+toString : Direction -> String
+toString direction =
+    case direction of
+        Up ->
+            "up"
+
+        Down ->
+            "down"
+
+        Left ->
+            "left"
+
+        Right ->
+            "right"
