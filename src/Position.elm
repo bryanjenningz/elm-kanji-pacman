@@ -1,8 +1,14 @@
-module Position exposing (equals, isOverlapping, isOverlappingWall, move, shortestPath)
+module Position exposing (Position, equals, isOverlapping, isOverlappingWall, move, shortestPath)
 
 import Direction exposing (Direction(..))
 import Screen
 import Set exposing (Set)
+
+
+type alias Position =
+    { x : Int
+    , y : Int
+    }
 
 
 equals : { a | x : Int, y : Int } -> { b | x : Int, y : Int } -> Bool

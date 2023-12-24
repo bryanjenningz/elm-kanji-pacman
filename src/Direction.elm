@@ -1,4 +1,4 @@
-module Direction exposing (Direction(..), fromKeysDown, toArrowKey, toDeltas)
+module Direction exposing (Direction(..), fromArrowKey, toArrowKey, toDeltas)
 
 import Set exposing (Set)
 
@@ -10,18 +10,18 @@ type Direction
     | Right
 
 
-fromKeysDown : Set String -> Maybe Direction
-fromKeysDown keysDown =
-    if Set.member "ArrowUp" keysDown then
+fromArrowKey : String -> Maybe Direction
+fromArrowKey key =
+    if key == "ArrowUp" then
         Just Up
 
-    else if Set.member "ArrowDown" keysDown then
+    else if key == "ArrowDown" then
         Just Down
 
-    else if Set.member "ArrowLeft" keysDown then
+    else if key == "ArrowLeft" then
         Just Left
 
-    else if Set.member "ArrowRight" keysDown then
+    else if key == "ArrowRight" then
         Just Right
 
     else

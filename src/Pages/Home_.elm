@@ -41,7 +41,7 @@ page shared route =
 type alias Model =
     { player : Player
     , monsters : List Monster
-    , keysDown : Set String
+    , arrowKeyDown : Maybe Direction
     , kanjis : Array Kanji
     }
 
@@ -50,7 +50,7 @@ init : () -> ( Model, Effect Msg )
 init () =
     ( { player = Player.init
       , monsters = Monsters.init
-      , keysDown = Set.empty
+      , arrowKeyDown = Nothing
       , kanjis = Kanji.init
       }
     , Kanji.fetch SetKanjis
@@ -64,8 +64,9 @@ init () =
 type Msg
     = NoOp
     | UpdateLoop
-    | SetKeyDown String
-    | SetKeyUp String
+    | SetArrowKeyDown Direction
+    | SetArrowKeyUp Direction
+    | SetAllArrowKeysUp
     | GenerateMonsterPath Monster
     | SetKanjis (Result Http.Error String)
 
@@ -79,13 +80,30 @@ update msg model =
         UpdateLoop ->
             updateLoop model
 
-        SetKeyDown key ->
-            ( { model | keysDown = Set.insert key model.keysDown }
+        SetArrowKeyDown direction ->
+            ( { model | arrowKeyDown = Just direction }
             , Effect.none
             )
 
-        SetKeyUp key ->
-            ( { model | keysDown = Set.remove key model.keysDown }
+        SetArrowKeyUp direction ->
+            ( { model
+                | arrowKeyDown =
+                    case model.arrowKeyDown of
+                        Nothing ->
+                            Nothing
+
+                        Just arrowKeyDown ->
+                            if arrowKeyDown == direction then
+                                Nothing
+
+                            else
+                                Just arrowKeyDown
+              }
+            , Effect.none
+            )
+
+        SetAllArrowKeysUp ->
+            ( { model | arrowKeyDown = Nothing }
             , Effect.none
             )
 
@@ -118,11 +136,10 @@ updateLoop model =
 
 
 updatePlayer : Model -> Player
-updatePlayer ({ player, keysDown } as model) =
+updatePlayer ({ player, arrowKeyDown } as model) =
     let
         newDirection =
-            Direction.fromKeysDown keysDown
-                |> Maybe.withDefault player.direction
+            arrowKeyDown |> Maybe.withDefault player.direction
 
         playerWithNewDirection =
             if Position.isOverlappingWall (movePlayer { player | direction = newDirection }) then
@@ -272,14 +289,21 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ Time.every 15 (\_ -> UpdateLoop)
-        , onKeyDown (Decode.map SetKeyDown keyDecoder)
-        , onKeyUp (Decode.map SetKeyUp keyDecoder)
+        , onKeyDown
+            (arrowKeyDecoder
+                |> Decode.map (Maybe.map SetArrowKeyDown >> Maybe.withDefault NoOp)
+            )
+        , onKeyUp
+            (arrowKeyDecoder
+                |> Decode.map (Maybe.map SetArrowKeyUp >> Maybe.withDefault NoOp)
+            )
         ]
 
 
-keyDecoder : Decoder String
-keyDecoder =
+arrowKeyDecoder : Decoder (Maybe Direction)
+arrowKeyDecoder =
     Decode.field "key" Decode.string
+        |> Decode.map Direction.fromArrowKey
 
 
 
@@ -299,8 +323,9 @@ view model =
             , style "align-items" "center"
             ]
             [ Gameboy.view
-                { onPadDown = Direction.toArrowKey >> SetKeyDown
-                , onPadUp = Direction.toArrowKey >> SetKeyUp
+                { onPadDown = SetArrowKeyDown
+                , onPadUp = SetArrowKeyUp
+                , onAllPadsUp = SetAllArrowKeysUp
                 , onClickA = NoOp
                 , onClickB = NoOp
                 , onClickStart = NoOp
@@ -322,6 +347,7 @@ view model =
 
                 Just targetMonster ->
                     text ("Eat the kanji named \"" ++ targetMonster.kanji.meaning ++ "\"")
+            , Html.p [] [ text (Debug.toString model.arrowKeyDown) ]
             ]
         ]
     }

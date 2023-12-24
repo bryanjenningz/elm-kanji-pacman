@@ -4,22 +4,126 @@ import Direction exposing (Direction(..))
 import Html exposing (Attribute, Html, button, div)
 import Html.Attributes exposing (style)
 import Html.Events exposing (on, onClick, onMouseDown, onMouseUp)
-import Json.Decode as Decode
+import Json.Decode as Decode exposing (Decoder)
+import Position exposing (Position)
 
 
-onTouchStart : msg -> Attribute msg
-onTouchStart message =
-    on "touchstart" (Decode.succeed message)
+onTouchStart : (Maybe Direction -> msg) -> Attribute msg
+onTouchStart toMsg =
+    on "touchstart" (Decode.map toMsg touchDirectionDecoder)
 
 
 onTouchEnd : msg -> Attribute msg
-onTouchEnd message =
-    on "touchend" (Decode.succeed message)
+onTouchEnd msg =
+    on "touchend" (Decode.succeed msg)
+
+
+onTouchMove : (Maybe Direction -> msg) -> Attribute msg
+onTouchMove toMsg =
+    on "touchmove" (Decode.map toMsg touchDirectionDecoder)
+
+
+touchDirectionDecoder : Decoder (Maybe Direction)
+touchDirectionDecoder =
+    Decode.map2 (\x y -> padPositionToDirection { x = x, y = y })
+        clientXDecoder
+        clientYDecoder
+
+
+clientXDecoder : Decoder Int
+clientXDecoder =
+    Decode.at [ "targetTouches", "0", "clientX" ] Decode.float
+        |> Decode.map round
+
+
+clientYDecoder : Decoder Int
+clientYDecoder =
+    Decode.at [ "targetTouches", "0", "clientY" ] Decode.float
+        |> Decode.map round
+
+
+type alias Rectangle =
+    { position : Position
+    , size : Size
+    }
+
+
+type alias Size =
+    { width : Int
+    , height : Int
+    }
+
+
+buttonPadSize : Size
+buttonPadSize =
+    { width = 30
+    , height = 30
+    }
+
+
+
+-- TODO: Remove hardcoded values button positions, instead calculate them after
+-- the buttons get rendered to the DOM.
+
+
+upButtonRectangle : Rectangle
+upButtonRectangle =
+    { position = { x = 90, y = 290 }
+    , size = buttonPadSize
+    }
+
+
+downButtonRectangle : Rectangle
+downButtonRectangle =
+    { position = { x = 90, y = 376 }
+    , size = buttonPadSize
+    }
+
+
+leftButtonRectangle : Rectangle
+leftButtonRectangle =
+    { position = { x = 57, y = 331 }
+    , size = buttonPadSize
+    }
+
+
+rightButtonRectangle : Rectangle
+rightButtonRectangle =
+    { position = { x = 130, y = 336 }
+    , size = buttonPadSize
+    }
+
+
+isWithin : Position -> Rectangle -> Bool
+isWithin position rect =
+    (position.x >= rect.position.x)
+        && (position.x <= rect.position.x + rect.size.width)
+        && (position.y >= rect.position.y)
+        && (position.y <= rect.position.y + rect.size.height)
+
+
+padPositionToDirection : Position -> Maybe Direction
+padPositionToDirection position =
+    if isWithin position upButtonRectangle then
+        Just Up
+
+    else if isWithin position downButtonRectangle then
+        Just Down
+
+    else if isWithin position leftButtonRectangle then
+        Just Left
+
+    else if isWithin position rightButtonRectangle then
+        Just Right
+
+    else
+        Nothing
 
 
 type alias Controls msg =
     { onPadDown : Direction -> msg
     , onPadUp : Direction -> msg
+    , onAllPadsUp : msg
     , onClickA : msg
     , onClickB : msg
     , onClickStart : msg
@@ -98,8 +202,6 @@ view controls screen =
                             , style "width" "40px"
                             , onMouseDown (controls.onPadDown Left)
                             , onMouseUp (controls.onPadUp Left)
-                            , onTouchStart (controls.onPadDown Left)
-                            , onTouchEnd (controls.onPadUp Left)
                             ]
                             []
                         , button
@@ -110,8 +212,6 @@ view controls screen =
                             , style "width" "40px"
                             , onMouseDown (controls.onPadDown Right)
                             , onMouseUp (controls.onPadUp Right)
-                            , onTouchStart (controls.onPadDown Right)
-                            , onTouchEnd (controls.onPadUp Right)
                             ]
                             []
                         ]
@@ -132,8 +232,6 @@ view controls screen =
                             , style "height" "40px"
                             , onMouseDown (controls.onPadDown Up)
                             , onMouseUp (controls.onPadUp Up)
-                            , onTouchStart (controls.onPadDown Up)
-                            , onTouchEnd (controls.onPadUp Up)
                             ]
                             []
                         , button
@@ -144,11 +242,41 @@ view controls screen =
                             , style "height" "40px"
                             , onMouseDown (controls.onPadDown Down)
                             , onMouseUp (controls.onPadUp Down)
-                            , onTouchStart (controls.onPadDown Down)
-                            , onTouchEnd (controls.onPadUp Down)
                             ]
                             []
                         ]
+
+                    -- MOBILE TOUCH PAD OVERLAY
+                    -- We need to use a single button instead of 4 buttons so
+                    -- that we can handle touchmove events that start in one
+                    -- direction and change to a different direction
+                    -- (e.g. the user touches the UP button then slides their
+                    -- finger to the LEFT button without lifting their finger)
+                    , button
+                        [ style "position" "absolute"
+                        , style "inset" "0"
+                        , style "z-index" "1"
+                        , onTouchStart
+                            (\maybeDirection ->
+                                case maybeDirection of
+                                    Nothing ->
+                                        controls.onAllPadsUp
+
+                                    Just direction ->
+                                        controls.onPadDown direction
+                            )
+                        , onTouchMove
+                            (\maybeDirection ->
+                                case maybeDirection of
+                                    Nothing ->
+                                        controls.onAllPadsUp
+
+                                    Just direction ->
+                                        controls.onPadDown direction
+                            )
+                        , onTouchEnd controls.onAllPadsUp
+                        ]
+                        []
                     ]
 
                 -- GAMEBOY RIGHT BUTTONS
