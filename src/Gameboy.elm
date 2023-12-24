@@ -94,8 +94,8 @@ rightButtonRectangle =
     }
 
 
-isWithin : Position -> Rectangle -> Bool
-isWithin position rect =
+isWithin : Rectangle -> Position -> Bool
+isWithin rect position =
     (position.x >= rect.position.x)
         && (position.x <= rect.position.x + rect.size.width)
         && (position.y >= rect.position.y)
@@ -104,16 +104,16 @@ isWithin position rect =
 
 padPositionToDirection : Position -> Maybe Direction
 padPositionToDirection position =
-    if isWithin position upButtonRectangle then
+    if position |> isWithin upButtonRectangle then
         Just Up
 
-    else if isWithin position downButtonRectangle then
+    else if position |> isWithin downButtonRectangle then
         Just Down
 
-    else if isWithin position leftButtonRectangle then
+    else if position |> isWithin leftButtonRectangle then
         Just Left
 
-    else if isWithin position rightButtonRectangle then
+    else if position |> isWithin rightButtonRectangle then
         Just Right
 
     else
