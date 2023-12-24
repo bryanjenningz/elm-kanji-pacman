@@ -8,129 +8,6 @@ import Json.Decode as Decode exposing (Decoder)
 import Position exposing (Position)
 
 
-onTouchStart : (Maybe Direction -> msg) -> Attribute msg
-onTouchStart toMsg =
-    on "touchstart" (Decode.map toMsg touchDirectionDecoder)
-
-
-onTouchEnd : msg -> Attribute msg
-onTouchEnd msg =
-    on "touchend" (Decode.succeed msg)
-
-
-onTouchMove : (Maybe Direction -> msg) -> Attribute msg
-onTouchMove toMsg =
-    on "touchmove" (Decode.map toMsg touchDirectionDecoder)
-
-
-touchDirectionDecoder : Decoder (Maybe Direction)
-touchDirectionDecoder =
-    Decode.map2 (\x y -> padPositionToDirection { x = x, y = y })
-        clientXDecoder
-        clientYDecoder
-
-
-clientXDecoder : Decoder Int
-clientXDecoder =
-    Decode.at [ "targetTouches", "0", "clientX" ] Decode.float
-        |> Decode.map round
-
-
-clientYDecoder : Decoder Int
-clientYDecoder =
-    Decode.at [ "targetTouches", "0", "clientY" ] Decode.float
-        |> Decode.map round
-
-
-type alias Rectangle =
-    { position : Position
-    , size : Size
-    }
-
-
-type alias Size =
-    { width : Int
-    , height : Int
-    }
-
-
-buttonPadSize : Size
-buttonPadSize =
-    { width = 50
-    , height = 50
-    }
-
-
-
--- TODO: Remove hardcoded values button positions, instead calculate them after
--- the buttons get rendered to the DOM.
-
-
-upButtonRectangle : Rectangle
-upButtonRectangle =
-    { position = { x = 80, y = 280 }
-    , size = buttonPadSize
-    }
-
-
-downButtonRectangle : Rectangle
-downButtonRectangle =
-    { position = { x = 80, y = 360 }
-    , size = buttonPadSize
-    }
-
-
-leftButtonRectangle : Rectangle
-leftButtonRectangle =
-    { position = { x = 40, y = 320 }
-    , size = buttonPadSize
-    }
-
-
-rightButtonRectangle : Rectangle
-rightButtonRectangle =
-    { position = { x = 120, y = 320 }
-    , size = buttonPadSize
-    }
-
-
-isWithin : Rectangle -> Position -> Bool
-isWithin rect position =
-    (position.x >= rect.position.x)
-        && (position.x <= rect.position.x + rect.size.width)
-        && (position.y >= rect.position.y)
-        && (position.y <= rect.position.y + rect.size.height)
-
-
-padPositionToDirection : Position -> Maybe Direction
-padPositionToDirection position =
-    if position |> isWithin upButtonRectangle then
-        Just Up
-
-    else if position |> isWithin downButtonRectangle then
-        Just Down
-
-    else if position |> isWithin leftButtonRectangle then
-        Just Left
-
-    else if position |> isWithin rightButtonRectangle then
-        Just Right
-
-    else
-        Nothing
-
-
-type alias Controls msg =
-    { onPadDown : Direction -> msg
-    , onPadUp : Direction -> msg
-    , onAllPadsUp : msg
-    , onClickA : msg
-    , onClickB : msg
-    , onClickStart : msg
-    , onClickSelect : msg
-    }
-
-
 view : Controls msg -> Html msg -> Html msg
 view controls screen =
     div
@@ -146,6 +23,21 @@ view controls screen =
         [ viewTop screen
         , viewBottom controls
         ]
+
+
+
+-- INTERNALS
+
+
+type alias Controls msg =
+    { onPadDown : Direction -> msg
+    , onPadUp : Direction -> msg
+    , onAllPadsUp : msg
+    , onClickA : msg
+    , onClickB : msg
+    , onClickStart : msg
+    , onClickSelect : msg
+    }
 
 
 viewTop : Html msg -> Html msg
@@ -350,3 +242,127 @@ viewStartSelectButtons controls =
             ]
             []
         ]
+
+
+
+-- EVENTS
+
+
+onTouchStart : (Maybe Direction -> msg) -> Attribute msg
+onTouchStart toMsg =
+    on "touchstart" (Decode.map toMsg touchDirectionDecoder)
+
+
+onTouchEnd : msg -> Attribute msg
+onTouchEnd msg =
+    on "touchend" (Decode.succeed msg)
+
+
+onTouchMove : (Maybe Direction -> msg) -> Attribute msg
+onTouchMove toMsg =
+    on "touchmove" (Decode.map toMsg touchDirectionDecoder)
+
+
+
+-- DECODERS
+
+
+touchDirectionDecoder : Decoder (Maybe Direction)
+touchDirectionDecoder =
+    Decode.map2 (\x y -> padPositionToDirection { x = x, y = y })
+        clientXDecoder
+        clientYDecoder
+
+
+clientXDecoder : Decoder Int
+clientXDecoder =
+    Decode.at [ "targetTouches", "0", "clientX" ] Decode.float
+        |> Decode.map round
+
+
+clientYDecoder : Decoder Int
+clientYDecoder =
+    Decode.at [ "targetTouches", "0", "clientY" ] Decode.float
+        |> Decode.map round
+
+
+
+-- RECTANGLE
+
+
+type alias Rectangle =
+    { position : Position
+    , size : Size
+    }
+
+
+type alias Size =
+    { width : Int
+    , height : Int
+    }
+
+
+buttonPadSize : Size
+buttonPadSize =
+    { width = 50
+    , height = 50
+    }
+
+
+
+-- TODO: Remove hardcoded values button positions, instead calculate them after
+-- the buttons get rendered to the DOM.
+
+
+upButtonRectangle : Rectangle
+upButtonRectangle =
+    { position = { x = 80, y = 280 }
+    , size = buttonPadSize
+    }
+
+
+downButtonRectangle : Rectangle
+downButtonRectangle =
+    { position = { x = 80, y = 360 }
+    , size = buttonPadSize
+    }
+
+
+leftButtonRectangle : Rectangle
+leftButtonRectangle =
+    { position = { x = 40, y = 320 }
+    , size = buttonPadSize
+    }
+
+
+rightButtonRectangle : Rectangle
+rightButtonRectangle =
+    { position = { x = 120, y = 320 }
+    , size = buttonPadSize
+    }
+
+
+isWithin : Rectangle -> Position -> Bool
+isWithin rect position =
+    (position.x >= rect.position.x)
+        && (position.x <= rect.position.x + rect.size.width)
+        && (position.y >= rect.position.y)
+        && (position.y <= rect.position.y + rect.size.height)
+
+
+padPositionToDirection : Position -> Maybe Direction
+padPositionToDirection position =
+    if position |> isWithin upButtonRectangle then
+        Just Up
+
+    else if position |> isWithin downButtonRectangle then
+        Just Down
+
+    else if position |> isWithin leftButtonRectangle then
+        Just Left
+
+    else if position |> isWithin rightButtonRectangle then
+        Just Right
+
+    else
+        Nothing
