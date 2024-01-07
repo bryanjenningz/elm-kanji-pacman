@@ -15,6 +15,10 @@
         { "charset": "UTF-8" },
         { "http-equiv": "X-UA-Compatible", "content": "IE=edge" },
         {
+          "name": "description",
+          "content": "Learn Japanese kanji by playing Pac-Man!"
+        },
+        {
           "name": "viewport",
           "content": "width=device-width, initial-scale=1.0"
         }
