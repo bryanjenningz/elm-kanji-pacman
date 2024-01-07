@@ -26,4 +26,8 @@ export const onReady: ElmLand.OnReadyFunction = ({ app }) => {
   app.ports?.outgoing?.subscribe?.((message: unknown) => {
     console.log({ message });
   });
+
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("/service-worker.js");
+  }
 };
