@@ -2,7 +2,7 @@ module Gameboy exposing (view)
 
 import Direction exposing (Direction(..))
 import Html exposing (Attribute, Html, button, div)
-import Html.Attributes exposing (style)
+import Html.Attributes exposing (attribute, style)
 import Html.Events exposing (on, onClick, onMouseDown, onMouseUp)
 import Json.Decode as Decode exposing (Decoder)
 import Position exposing (Position)
@@ -108,6 +108,7 @@ viewDirectionPad controls =
                 , style "width" "40px"
                 , onMouseDown (controls.onPadDown Left)
                 , onMouseUp (controls.onPadUp Left)
+                , ariaLabel "Left"
                 ]
                 []
             , button
@@ -118,6 +119,7 @@ viewDirectionPad controls =
                 , style "width" "40px"
                 , onMouseDown (controls.onPadDown Right)
                 , onMouseUp (controls.onPadUp Right)
+                , ariaLabel "Right"
                 ]
                 []
             ]
@@ -138,6 +140,7 @@ viewDirectionPad controls =
                 , style "height" "40px"
                 , onMouseDown (controls.onPadDown Up)
                 , onMouseUp (controls.onPadUp Up)
+                , ariaLabel "Up"
                 ]
                 []
             , button
@@ -148,6 +151,7 @@ viewDirectionPad controls =
                 , style "height" "40px"
                 , onMouseDown (controls.onPadDown Down)
                 , onMouseUp (controls.onPadUp Down)
+                , ariaLabel "Down"
                 ]
                 []
             ]
@@ -181,6 +185,7 @@ viewDirectionPad controls =
                             controls.onPadDown direction
                 )
             , onTouchEnd controls.onAllPadsUp
+            , ariaLabel "Touchpad"
             ]
             []
         ]
@@ -201,6 +206,7 @@ viewABButtons controls =
             , style "background-color" "black"
             , style "border-radius" "99px"
             , onClick controls.onClickB
+            , ariaLabel "B"
             ]
             []
         , button
@@ -212,6 +218,7 @@ viewABButtons controls =
             , style "background-color" "black"
             , style "border-radius" "99px"
             , onClick controls.onClickA
+            , ariaLabel "A"
             ]
             []
         ]
@@ -231,6 +238,7 @@ viewStartSelectButtons controls =
             , style "background-color" "black"
             , style "border-radius" "20px"
             , onClick controls.onClickSelect
+            , ariaLabel "Start"
             ]
             []
         , button
@@ -239,9 +247,15 @@ viewStartSelectButtons controls =
             , style "background-color" "black"
             , style "border-radius" "20px"
             , onClick controls.onClickStart
+            , ariaLabel "Select"
             ]
             []
         ]
+
+
+ariaLabel : String -> Attribute msg
+ariaLabel =
+    attribute "aria-label"
 
 
 
