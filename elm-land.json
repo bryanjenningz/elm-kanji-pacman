@@ -21,9 +21,13 @@
         {
           "name": "viewport",
           "content": "width=device-width, initial-scale=1.0"
-        }
+        },
+        { "name": "theme-color", "content": "#000" }
       ],
-      "link": [{ "rel": "stylesheet", "href": "/main.css" }],
+      "link": [
+        { "rel": "stylesheet", "href": "/main.css" },
+        { "rel": "manifest", "href": "/app.webmanifest" }
+      ],
       "script": []
     },
     "router": {
