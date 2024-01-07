@@ -28,7 +28,7 @@
         { "rel": "stylesheet", "href": "/main.css" },
         { "rel": "manifest", "href": "/app.webmanifest" }
       ],
-      "script": []
+      "script": [{ "src": "/init-service-worker.js", "defer": true }]
     },
     "router": {
       "useHashRouting": false
