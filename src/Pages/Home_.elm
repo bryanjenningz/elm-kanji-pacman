@@ -312,7 +312,7 @@ arrowKeyDecoder =
 
 view : Model -> View Msg
 view model =
-    { title = "Elm Kanji Pac-Man"
+    { title = "Kanji Pac-Man"
     , body =
         [ div
             [ style "min-height" "100dvh"
