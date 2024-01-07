@@ -1,6 +1,6 @@
 {
   "name": "Kanji Pac-Man",
-  "short_name": "Kanji Pac-Man",
+  "short_name": "Kanji-Pac",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#000",
